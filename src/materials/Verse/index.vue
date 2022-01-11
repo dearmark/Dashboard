@@ -9,8 +9,20 @@
       padding: componentSetting.padding + 'px',
       fontFamily: componentSetting.fontFamily,
       ...positionCSS
-    }">
-    <span :style="componentSetting.clickActionType ? 'cursor: pointer' : ''" @click="handleClickAction" @contextmenu="contextmenu">{{ verse }}</span>
+    }"
+  >
+    {{ verse }}
+    <div
+      class="title"
+      :style="{
+        fontSize: componentSetting.textFontSize * 0.7 + 'px',
+        color: componentSetting.textColor,
+        textShadow: componentSetting.textShadow,
+        padding: componentSetting.padding + 'px',
+        fontFamily: componentSetting.fontFamily,
+        ...positionCSS
+      }"
+    >{{ title }}</div>
   </div>
 </template>
 
@@ -18,8 +30,7 @@
 import { defineComponent, onMounted, onUnmounted, ref, computed, watch } from 'vue'
 import { mapPosition } from '@/plugins/position-selector'
 import { execCopy } from '@/utils'
-import { ElNotification, NotifyPartial } from 'element-plus'
-import { useStore } from 'vuex'
+import { ElNotification, NotifyPartial } from 'element-plus';
 export default defineComponent({
   name: 'Verse',
   props: {
@@ -30,14 +41,15 @@ export default defineComponent({
   },
   setup(props) {
     const verse = ref('')
+    const title = ref('')
     const verseElement = ref()
-    const store = useStore()
 
-    async function getVerse () {
+    async function getVerse() {
       try {
         const res = await fetch('https://v1.jinrishici.com/all.json')
-        const { content } = await res.json()
+        const { content, origin, author } = await res.json()
         verse.value = content
+        title.value = `《${origin}》${author}`
       } catch {
         //
       }
@@ -81,18 +93,12 @@ export default defineComponent({
       }
     }
 
-    const contextmenu = (e: MouseEvent) => {
-      if (store.state.isLock) {
-        e.stopPropagation()
-      }
-    }
-
     return {
       verse,
+      title,
       positionCSS,
       verseElement,
-      handleClickAction,
-      contextmenu
+      handleClickAction
     }
   }
 })
@@ -103,5 +109,12 @@ export default defineComponent({
   width: 100%;
   height: 100%;
   display: flex;
+  // font-family: "Source Han Serif CN";
 }
+// .title {
+//   position: relative;
+//   display: flex;
+//   width: 50%;
+//   height: 50%;
+// }
 </style>

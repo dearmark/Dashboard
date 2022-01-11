@@ -43,7 +43,13 @@ const dataFont = {
     { cn: '华文隶书', en: 'STLiti' },
     { cn: '华文行楷', en: 'STXingkai' },
     { cn: '方正舒体', en: 'FZShuTi' },
-    { cn: '方正姚体', en: 'FZYaoti' }
+    { cn: '方正姚体', en: 'FZYaoti' },
+    // { cn: 'SC思源宋体', en: 'Source Han Serif SC' },
+    { cn: '鸿蒙', en: 'HarmonyOS Sans SC' },
+    { cn: '思源宋体CN', en: 'Source Han Serif CN' },
+    { cn: '思源宋体SC', en: 'Source Han Serif SC' },
+    // { cn: '思源宋体CN', en: 'Source Han Serif' },
+
   ]
 };
 
@@ -51,7 +57,7 @@ const fontList = Object.keys(dataFont).reduce((prev: any[], curr: any) => {
   return [...prev, ...(dataFont as any)[curr]]
 }, [])
 
-export const isSupportFontFamily = function(f: string) {
+export const isSupportFontFamily = function (f: string) {
   if (typeof f !== 'string') {
     return false
   }
@@ -70,18 +76,18 @@ export const isSupportFontFamily = function(f: string) {
   b.textAlign = 'center';
   b.fillStyle = 'black';
   b.textBaseline = 'middle';
-  const g = function(j: string) {
+  const g = function (j: string) {
     b.clearRect(0, 0, a, i);
     b.font = d + 'px ' + j + ', ' + h;
     b.fillText(e, a / 2, i / 2);
     const k = b.getImageData(0, 0, a, i).data;
-    return [].slice.call(k).filter(function(l) {
+    return [].slice.call(k).filter(function (l) {
       return l !== 0
     });
   };
   return g(h).join('') !== g(f).join('');
 };
 
-export function getSupportFontFamilyList () {
+export function getSupportFontFamilyList() {
   return fontList.filter(item => isSupportFontFamily(item.en))
 }
