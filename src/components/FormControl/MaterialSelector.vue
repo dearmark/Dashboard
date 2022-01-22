@@ -11,7 +11,7 @@
     </div>
     <button
       type="button"
-      class="btn btn-primary"
+      class="btn btn-primary btn-large"
       :disabled="disabled"
       @click="handleOpenSelector"
       style="margin: 0">选择物料</button>
@@ -24,7 +24,8 @@
       appendToBody
       :closeOnClickOutside="false"
       :listenWindowSizeChange="true"
-      @beforeClose="close">
+      @beforeClose="close"
+      v-bind="dialogOptions">
       <div class="material-wrapper" v-if="beginLoad">
         <div class="material" v-for="item in materialList" :key="item.value" @click="handleSelect(item)">
           <div class="img-wrapper">
@@ -44,6 +45,7 @@
 <script lang="ts">
 import { computed, defineComponent, ref } from 'vue'
 import { MATERIAL_LIST_MAP } from '@/constanst'
+import useDialogOption from '@/hooks/useDialogOption'
 export default defineComponent({
   name: 'MaterialSelector',
   props: {
@@ -80,8 +82,11 @@ export default defineComponent({
 
     const handleSelect = (item: (typeof materialList)[number]) => {
       emit('update:modelValue', item.value)
+      emit('change')
       dialog.value.close()
     }
+
+    const dialogOptions = useDialogOption(true)
 
     return {
       dialog,
@@ -90,7 +95,8 @@ export default defineComponent({
       materialList,
       activeItem,
       handleSelect,
-      beginLoad
+      beginLoad,
+      dialogOptions
     }
   }
 })
