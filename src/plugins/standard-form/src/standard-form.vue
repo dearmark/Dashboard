@@ -12,7 +12,8 @@
             :is="`el-${item.type}`"
             v-bind="{...item.attrs}"
             v-on="{...item.events}"
-            v-model="formData[key]">{{item.text}}
+            v-model="formData[key]">
+          <template v-if="item.text">{{item.text}}</template>
           <template v-if="item.type === 'select'">
             <el-option
               v-for="(option, index) in item.option.list"
@@ -34,12 +35,6 @@
               :label="item.checkbox.value ? checkbox[item.checkbox.value] : checkbox"
               v-bind="{...item.checkbox.attrs}">{{item.checkbox.label ? checkbox[item.checkbox.label] : (item.checkbox.value ? checkbox[item.checkbox.value] : checkbox)}}</el-checkbox>
           </template>
-          <template v-if="item.type === 'button-group'">
-            <el-button
-              v-for="(button,index) in item.button"
-              :key="index"
-              v-bind="{...button.attrs}">{{button.text}}</el-button>
-          </template>
         </component>
       </template>
       <template v-if="item.slot">
@@ -48,7 +43,9 @@
       </template>
       <template v-if="item.tips">
         <el-tooltip effect="dark" :content="item.tips" placement="bottom">
-          <i class="form-item-tips el-icon-warning-outline"></i>
+          <div class="form-item-tips">
+            <Icon name="infomation" size="20" />
+          </div>
         </el-tooltip>
       </template>
     </el-form-item>
@@ -61,7 +58,7 @@ import { defineComponent } from 'vue'
 export default defineComponent({
   name: 'StandardForm',
   components: {
-    JsxRender,
+    JsxRender
   },
   props: {
     formConf: {
@@ -139,7 +136,7 @@ export default defineComponent({
     align-items: center;
     font-size: 20px;
     cursor: pointer;
-    color: $--color-grey3;
+    color: $color-grey4;
   }
   .block-radio-group {
     .el-radio {
