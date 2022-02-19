@@ -9,8 +9,20 @@ export default defineConfig({
   base: process.env.VITE_APP_BUILD_MODE === 'crx' ? './' : '/Dashboard/',
   resolve: {
     alias: {
-      '@': resolve(__dirname, 'src')
+      '@': resolve(__dirname, 'src'),
     }
+  },
+  optimizeDeps: {
+    include: [
+      'vue',
+      'vuex',
+      'vue-grid-layout',
+      'element-plus',
+      'vuedraggable',
+      '@howdyjs/to-control',
+      '@howdyjs/mouse-menu',
+      'dayjs'
+    ]
   },
   css: {
     preprocessorOptions: {
@@ -21,6 +33,7 @@ export default defineConfig({
     }
   },
   plugins: [
+    // viteCommonjs(),
     Vue({
       include: [/\.vue$/, /\.md$/]
     }),

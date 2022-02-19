@@ -1,6 +1,6 @@
 {
   "name": "howdz-dashboard",
-  "version": "1.1.7",
+  "version": "1.2.0",
   "description": "Custom your personal browser start page from some configurable components",
   "author": {
     "name": "leon-kfd",
@@ -74,7 +74,6 @@
     }
   },
   "dependencies": {
-    "@element-plus/icons-vue": "^0.2.7",
     "@emotion/css": "^11.7.1",
     "@howdyjs/animation-dialog": "^2.0.5",
     "@howdyjs/mouse-menu": "^2.0.5",
@@ -85,7 +84,6 @@
     "@milkdown/plugin-history": "5.3.1",
     "@milkdown/plugin-listener": "5.3.1",
     "@milkdown/plugin-math": "5.3.1",
-    "@milkdown/plugin-prism": "5.3.1",
     "@milkdown/plugin-slash": "5.3.1",
     "@milkdown/plugin-tooltip": "5.3.1",
     "@milkdown/preset-commonmark": "5.3.1",
@@ -109,7 +107,7 @@
     "@types/node": "^14.14.37",
     "@typescript-eslint/eslint-plugin": "^4.21.0",
     "@typescript-eslint/parser": "^4.21.0",
-    "@vitejs/plugin-vue": "^1.6.0",
+    "@vitejs/plugin-vue": "^2.2.0",
     "@vitejs/plugin-vue-jsx": "^1.1.3",
     "@vue/compiler-sfc": "^3.2.4",
     "@vue/eslint-config-standard": "^5.1.2",
@@ -130,7 +128,7 @@
     "rimraf": "^3.0.2",
     "sass": "^1.41.0",
     "typescript": "4.1.3",
-    "vite": "2.6.13",
+    "vite": "^2.8.0",
     "vite-plugin-md": "^0.11.4",
     "vue-tsc": "^0.0.8"
   },
