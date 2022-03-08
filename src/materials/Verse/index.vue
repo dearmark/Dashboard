@@ -31,7 +31,7 @@ import { defineComponent, onMounted, onUnmounted, ref, computed, watch } from 'v
 import { mapPosition } from '@/plugins/position-selector'
 import { execCopy } from '@/utils'
 import { ElNotification } from 'element-plus'
-import { useStore } from 'vuex'
+import { useStore } from '@/store'
 export default defineComponent({
   name: 'Verse',
   props: {
@@ -65,17 +65,24 @@ export default defineComponent({
       }
       timer = window.setInterval(getVerse, refreshDuration)
     }
-    watch(() => props.componentSetting.duration, () => refreshTimer(), { immediate: true })
+    watch(
+      () => props.componentSetting.duration,
+      () => refreshTimer(),
+      { immediate: true }
+    )
     onMounted(() => getVerse())
     onUnmounted(() => timer && window.clearInterval(timer))
 
     const positionCSS = computed(() => mapPosition(props.componentSetting.position))
 
-    watch(() => verse.value, () => {
-      if (verseElement.value && verseElement.value.animate) {
-        verseElement.value.animate({ opacity: [0, 1] }, 400)
+    watch(
+      () => verse.value,
+      () => {
+        if (verseElement.value && verseElement.value.animate) {
+          verseElement.value.animate({ opacity: [0, 1] }, 400)
+        }
       }
-    })
+    )
 
     const handleClickAction = () => {
       if (props.componentSetting.clickActionType === 1) {
