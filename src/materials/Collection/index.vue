@@ -68,13 +68,11 @@
         </div>
       </div>
     </div>
-    <animation-dialog
-      ref="dialog"
+    <easy-dialog
+      v-model="dialogVisible"
       width="300px"
       height="330px"
-      appendToBody
-      :closeOnClickOutside="false"
-      @beforeClose="dialogFooterVisible = false"
+      closeOnClickOutside
       @close="handleDialogClose"
     >
       <div class="edit-content" v-show="editState.editingActive" @keydown.stop="">
@@ -91,14 +89,14 @@
         </div>
       </div>
       <template #footer>
-        <div class="footer" v-if="dialogFooterVisible" style="text-align: right; padding: 12px">
+        <div class="footer" style="text-align: right; padding: 12px">
           <button
             type="button"
             class="btn"
             :disabled="!editState.editingInfo.url && !editState.editingInfo.remark"
             @click="clearEidtInfo"
           >
-            清空
+            {{$t('清空')}}
           </button>
           <button
             type="button"
@@ -106,11 +104,11 @@
             :loading="saveLoading"
             @click="handleUserKeySave"
           >
-            确认
+            {{$t('确认')}}
           </button>
         </div>
       </template>
-    </animation-dialog>
+    </easy-dialog>
   </div>
 </template>
 
@@ -121,6 +119,7 @@ import { useStore } from '@/store'
 import { coverAsync } from '@/utils'
 import { getBase64ByAjax, getTargetIconV2 } from '@/utils/images'
 import { mapPosition } from '@/plugins/position-selector'
+import { useI18n } from 'vue-i18n'
 export default defineComponent({
   name: 'Collection',
   props: {
@@ -143,6 +142,8 @@ export default defineComponent({
 
     const positionCSS = computed(() => mapPosition(props.componentSetting.position))
 
+    const { t } = useI18n()
+
     const editState = reactive({
       editingActive: false,
       editingInfo: {
@@ -151,8 +152,6 @@ export default defineComponent({
         remark: ''
       }
     })
-
-    const dialogFooterVisible = ref(false)
 
     const handleKeyboardKeydown = (e: KeyboardEvent) => {
       if (!props.componentSetting.useKeyboardEvent) return
@@ -178,16 +177,15 @@ export default defineComponent({
       document.removeEventListener('keydown', handleKeyboardKeydown)
     })
 
-    const dialog = ref()
+    const dialogVisible = ref(false)
     const handleKeyClick = ($event: MouseEvent, key: string) => {
       if (key && userSettingKeyMap.value[key]) {
         pageJumpTo(userSettingKeyMap.value[key].url)
       } else {
-        dialog.value.open($event.currentTarget)
+        dialogVisible.value = true
         editState.editingInfo.key = key
         setTimeout(() => {
           editState.editingActive = true
-          dialogFooterVisible.value = true
         }, 200)
       }
     }
@@ -198,27 +196,25 @@ export default defineComponent({
       editState.editingActive = false
     }
     const showDialog = ($event: MouseEvent, key: string) => {
-      const el = ($event?.currentTarget as HTMLElement)?.parentNode?.parentNode
-      dialog.value.open(el)
+      dialogVisible.value = true
       editState.editingInfo.key = key
       const { url, remark } = userSettingKeyMap.value[key]
       editState.editingInfo.url = url
       editState.editingInfo.remark = remark
       setTimeout(() => {
         editState.editingActive = true
-        dialogFooterVisible.value = true
       }, 200)
     }
     const clearEidtInfo = () => {
       if (editState.editingInfo.url && editState.editingInfo.remark) {
-        if (confirm('确定清除该按键绑定的网页吗?')) {
+        if (confirm(t('确定清除该按键绑定的网页吗?'))) {
           editState.editingInfo.url = ''
           editState.editingInfo.remark = ''
           const _userSettingKeyMap = unref(userSettingKeyMap)
           delete _userSettingKeyMap[editState.editingInfo.key]
           updateUserSettingKeyMap(_userSettingKeyMap)
           handleDialogClose()
-          dialog.value.close()
+          dialogVisible.value = false
         }
       }
     }
@@ -252,10 +248,10 @@ export default defineComponent({
         setTimeout(() => {
           handleDialogClose()
           saveLoading.value = false
-          dialog.value.close()
+          dialogVisible.value = false
         }, 400)
       } else {
-        window.alert('URL地址不正确')
+        window.alert(t('URL地址不正确'))
       }
     }
     const handleImgError = (e: any) => {
@@ -295,9 +291,8 @@ export default defineComponent({
       handleImgError,
       handleUserKeySave,
       saveLoading,
-      dialog,
+      dialogVisible,
       positionCSS,
-      dialogFooterVisible,
       getTargetIconV2
     }
   }

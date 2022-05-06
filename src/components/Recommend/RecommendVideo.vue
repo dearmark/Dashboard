@@ -1,42 +1,34 @@
 <template>
-  <button type="button" class="btn btn-small btn-primary" style="margin: 0;margin-right: 5px;" @click="handleOpenSelector">动态壁纸推荐</button>
-  <animation-dialog
-    ref="dialog"
-    animationMode
-    title="动态壁纸推荐"
+  <button type="button" class="btn btn-small btn-primary" style="margin: 0;margin-right: 5px;" @click="handleOpenSelector">{{$t('动态壁纸推荐')}}</button>
+  <easy-dialog
+    v-model="dialogVisible"
+    :title="$t('动态壁纸推荐')"
     width="min(760px, 94vw)"
-    height="min(480px, 80vh)"
-    appendToBody
-    :closeOnClickOutside="false"
-    :listenWindowSizeChange="true"
-    @beforeClose="close"
-    v-bind="dialogOptions">
-    <div class="tips">以下提供部分推荐动态壁纸选择，来源于网络CDN，有可能出现无法访问问题，你也可以手动输入自定义的网络https视频路径。</div>
+    height="min(480px, 80vh)">
+    <div class="tips">{{$t('recommendVideoTips')}}</div>
     <div class="video-wrapper" v-if="beginLoad">
       <div class="video" v-for="item in videoList" :key="item.img" @click="handleSelect(item)">
         <div class="img-wrapper">
-          <img v-if="item.img" :src="item.img" />
+          <img v-if="item.img" :src="item.img" loading="lazy" />
         </div>
       </div>
       <div class="video-fake" v-for="item in 4" :key="item"></div>
     </div>
-  </animation-dialog>
+  </easy-dialog>
 </template>
 
 <script lang="ts" setup>
 import { ref } from 'vue'
-import useDialogOption from '@/hooks/useDialogOption'
 const emit = defineEmits(['submit'])
 const beginLoad = ref(false)
-const dialog = ref()
+const dialogVisible = ref(false)
 const handleOpenSelector = () => {
-  dialog.value.open()
+  dialogVisible.value = true
   if (!beginLoad.value) beginLoad.value = true
 }
-const close = () => {}
 const handleSelect = (item: any) => {
   emit('submit', item.video)
-  dialog.value.close()
+  dialogVisible.value = false
 }
 
 // videoList
@@ -48,7 +40,6 @@ const videoList = CDN_VIDEO_MAP.map(i => {
   }
 })
 
-const dialogOptions = useDialogOption(true)
 </script>
 <style lang="scss" scoped>
 .tips {

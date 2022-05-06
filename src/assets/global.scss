@@ -75,7 +75,7 @@ textarea {
   line-height: 1;
   color: $color-dark;
   background: $color-white;
-  border: 1px solid $color-dark;
+  border: 1px solid $color-grey4;
   outline: none;
   overflow: hidden;
   cursor: pointer;
@@ -92,7 +92,7 @@ textarea {
   transition: 0.1s;
   user-select: none;
   &:hover {
-    filter: drop-shadow(0 2px 8px rgba($color-dark, 0.32));
+    filter: drop-shadow(0 2px 8px rgba($color-grey4, 0.48));
   }
   &.btn-small {
     font-size: 12px;
@@ -172,17 +172,6 @@ textarea {
   }
 }
 
-/* reset animation-dialog */
-.animation-dialog-wrapper {
-  z-index: 1500 !important;
-}
-.animation-dialog-wrapper .dialog .dialog-title .dialog-static-title:after {
-  border-left: 4px solid $color-primary !important;
-}
-.animation-dialog-wrapper .dialog .dialog-body {
-  padding: 5px 20px !important;
-}
-
 html,
 body {
   width: 100%;
@@ -200,6 +189,12 @@ body {
 
 .flex-center {
   @include flex-center;
+}
+
+.ellipsis {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .bold {
@@ -294,9 +289,7 @@ body {
   }
 }
 
-.bookmark-config-dialog,
-.bookmark-move-dialog {
-  z-index: 2002 !important;
+.bookmark-config-dialog {
   .el-radio {
     margin-right: 12px;
     margin-bottom: 2px !important;
@@ -328,4 +321,28 @@ body {
   .el-tabs__item {
     user-select: none;
   }
+}
+
+.standard-form {
+  .el-form-item__label {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+}
+
+.tools-tips {
+  max-width: 320px;
+}
+
+.el-notification__content {
+  text-align: left;
+}
+
+.el-input__inner:focus,
+.el-textarea__inner:focus {
+  box-shadow: 0 0 0 2px rgba($color-primary, .2);
+}
+.el-color-picker__trigger {
+  border-radius: 0
 }

@@ -68,7 +68,11 @@
           </div>
         </template>
         <template #footer>
-          <div v-if="!isInBatch" class="item btn-add-item" @click="handleAddNewBookmark()">
+          <div
+            v-if="!isInBatch"
+            v-show="!componentSetting.hiddenAddBtn || list.length === 0"
+            class="item btn-add-item"
+            @click="handleAddNewBookmark()">
             <div class="btn-add-wrapper">
               <Icon name="add" />
             </div>
@@ -91,6 +95,7 @@
       ref="popover"
       :close-on-click-outside="!!componentSetting.closeClickOutside"
       @closed="popoverClosed"
+      :zIndex="1000"
     >
       <div class="popover-wrapper" v-if="folderOpener">
         <div class="title">{{ folderOpener.title }}</div>
@@ -149,6 +154,7 @@
           <template #footer>
             <div
               v-if="!isInBatch"
+              v-show="!componentSetting.hiddenAddBtn || (folderOpener.children && folderOpener.children.length === 0)"
               class="item btn-add-item"
               :style="{ width: boxWrapperSize, height: boxWrapperSize, padding }"
               @click="handleAddNewBookmark(folderOpener)"
@@ -172,14 +178,14 @@
           <div class="close-btn" @click="closeBatch"><Icon name="close" /></div>
           <div class="selected-count">
             <span class="num">{{ selected.length }}</span
-            >项已选择
+            >{{$t('项已选择')}}
           </div>
           <div class="operation-btn-wrapper">
             <div class="move-btn" @click="handleMove(selected, false, folderOpener)">
-              <Icon name="send-plane" size="16" /> 移动
+              <Icon name="send-plane" size="16" /> {{$t('移动')}}
             </div>
             <div class="del-btn" @click="handleMove(selected, true, folderOpener)">
-              <Icon name="delete" size="16" /> 删除
+              <Icon name="delete" size="16" /> {{$t('删除')}}
             </div>
           </div>
         </div>
@@ -189,14 +195,14 @@
       <div class="close-btn" @click="closeBatch"><Icon name="close" /></div>
       <div class="selected-count">
         <span class="num">{{ selected.length }}</span
-        >项已选择
+        >{{$t('项已选择')}}
       </div>
       <div class="operation-btn-wrapper">
         <div class="move-btn" @click="handleMove(selected)">
-          <Icon name="send-plane" size="16" /> 移动
+          <Icon name="send-plane" size="16" /> {{$t('移动')}}
         </div>
         <div class="del-btn" @click="handleMove(selected, true)">
-          <Icon name="delete" size="16" /> 删除
+          <Icon name="delete" size="16" /> {{$t('删除')}}
         </div>
       </div>
     </div>
@@ -214,6 +220,7 @@ import Icon from '@/components/Tools/Icon.vue'
 import MouseMenuDirective from '@/plugins/mouse-menu'
 import { ElNotification } from 'element-plus'
 import { uid } from '@/utils'
+import { useI18n } from 'vue-i18n'
 const props = defineProps({
   componentSetting: {
     type: Object,
@@ -232,6 +239,8 @@ const vMouseMenu = {
   ...MouseMenuDirective,
   updated: MouseMenuDirective.mounted
 }
+
+const { t } = useI18n()
 
 const configDialog = ref()
 
@@ -269,14 +278,21 @@ const list = computed({
 
 const menuList = ref([
   {
-    label: '编辑',
+    label: () => t('添加'),
+    icon: h(Icon, { name: 'add', size: 18 }),
+    fn: (params: any) => {
+      handleAddNewBookmark(params.parent)
+    }
+  },
+  {
+    label: () => t('编辑'),
     fn: (params: any) => {
       handleEdit(params.element, params.parent)
     },
     icon: h(Icon, { name: 'lock', size: 18 })
   },
   {
-    label: '移动',
+    label: () => t('移动'),
     fn: (params: any) => {
       handleMove([params.element], false, params.parent)
     },
@@ -284,7 +300,7 @@ const menuList = ref([
     icon: h(Icon, { name: 'send-plane', size: 18 })
   },
   {
-    label: '删除',
+    label: () => t('删除'),
     fn: (params: any) => {
       handleMove([params.element], true, params.parent)
     },
@@ -295,7 +311,7 @@ const menuList = ref([
     line: true
   },
   {
-    label: '批量操作',
+    label: () => t('批量操作'),
     icon: h(Icon, { name: 'checkbox-multiple', size: 18 }),
     fn: (params: any) => {
       setBatch(params.parent)
@@ -436,7 +452,7 @@ const handleMove = async (params: Bookmark[], isDelete = false, parent?: Bookmar
       const folder = await moveDialog.value.move(parent)
       if (folder === parent?.id) return
       if (params.filter((item) => item.type === 'folder').length) {
-        ElNotification({ title: '提示', message: '目前暂不支持移动文件夹' })
+        ElNotification({ title: t('提示'), message: t('目前暂不支持移动文件夹') })
         params = params.filter((item) => item.type !== 'folder')
       }
       if (folder === '$root') {
@@ -458,7 +474,7 @@ const handleMove = async (params: Bookmark[], isDelete = false, parent?: Bookmar
         }
       }
     } else {
-      if (!confirm('确认要删除所选项?')) return
+      if (!confirm(t('确认要删除所选项?'))) return
     }
     // 删除源
     if (parent) {

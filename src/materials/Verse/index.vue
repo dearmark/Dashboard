@@ -1,28 +1,21 @@
 <template>
-  <div
-    class="wrapper"
-    ref="verseElement"
-    :style="{
-      fontSize: componentSetting.textFontSize + 'px',
+  <div class="wrapper" ref="verseElement" :style="{
+    fontSize: componentSetting.textFontSize + 'px',
+    color: componentSetting.textColor,
+    textShadow: componentSetting.textShadow,
+    padding: componentSetting.padding + 'px',
+    fontFamily: componentSetting.fontFamily,
+    ...positionCSS
+  }">
+    {{ verse }}
+    <div class="title" :style="{
+      fontSize: componentSetting.textFontSize * 0.7 + 'px',
       color: componentSetting.textColor,
       textShadow: componentSetting.textShadow,
       padding: componentSetting.padding + 'px',
       fontFamily: componentSetting.fontFamily,
       ...positionCSS
-    }"
-  >
-    {{ verse }}
-    <div
-      class="title"
-      :style="{
-        fontSize: componentSetting.textFontSize * 0.7 + 'px',
-        color: componentSetting.textColor,
-        textShadow: componentSetting.textShadow,
-        padding: componentSetting.padding + 'px',
-        fontFamily: componentSetting.fontFamily,
-        ...positionCSS
-      }"
-    >{{ title }}</div>
+    }">{{ title }}</div>
   </div>
 </template>
 
@@ -31,7 +24,8 @@ import { defineComponent, onMounted, onUnmounted, ref, computed, watch } from 'v
 import { mapPosition } from '@/plugins/position-selector'
 import { execCopy } from '@/utils'
 import { ElNotification } from 'element-plus'
-import { useStore } from '@/store'
+// import { useStore } from '@/store'
+// import { useI18n } from 'vue-i18n'
 export default defineComponent({
   name: 'Verse',
   props: {
@@ -93,9 +87,9 @@ export default defineComponent({
       } else if (props.componentSetting.clickActionType === 3) {
         if (execCopy(verse.value)) {
           ElNotification({
-            title: '提示',
+            title: t('提示'),
             type: 'success',
-            message: '复制成功'
+            message: t('复制成功')
           })
         }
       }
@@ -119,6 +113,7 @@ export default defineComponent({
   display: flex;
   // font-family: "Source Han Serif CN";
 }
+
 // .title {
 //   position: relative;
 //   display: flex;

@@ -1,6 +1,6 @@
 {
   "name": "howdz-dashboard",
-  "version": "1.2.1",
+  "version": "1.2.4",
   "description": "Custom your personal browser start page from some configurable components",
   "author": {
     "name": "leon-kfd",
@@ -75,7 +75,6 @@
   },
   "dependencies": {
     "@emotion/css": "^11.7.1",
-    "@howdyjs/animation-dialog": "^2.0.5",
     "@howdyjs/mouse-menu": "^2.0.5",
     "@howdyjs/to-control": "^2.0.5",
     "@milkdown/core": "5.3.1",
@@ -97,10 +96,12 @@
     "pinia-plugin-persistedstate": "^1.5.0",
     "vue": "^3.2.4",
     "vue-grid-layout": "3.0.0-beta1",
+    "vue-i18n": "9",
     "vuedraggable": "^4.0.1"
   },
   "devDependencies": {
     "@commitlint/config-conventional": "13.1.0",
+    "@intlify/vite-plugin-vue-i18n": "^3.3.1",
     "@types/file-saver": "^2.0.2",
     "@types/jquery": "^3.5.11",
     "@types/js-md5": "^0.4.2",

@@ -1,39 +1,36 @@
 <template>
-  <animation-dialog
-    ref="dialog"
-    animationMode
-    title="辅助功能"
+  <easy-dialog
+    v-model="dialogVisible"
+    :title="$t('辅助功能')"
     width="min(480px, 98vw)"
     height="min(520px, 90vh)"
-    :closeOnClickOutside="false"
-    :listenWindowSizeChange="true"
-    appendToBody
-    @beforeClose="close"
     customClass="auxiliary-config-dialog"
-    v-bind="dialogOptions"
+    @close="close"
   >
     <el-tabs tab-position="left" class="auxiliary-tab" style="height: 100%" v-model="activeName">
       <el-tab-pane
         v-for="item in tabList"
         style="height: 100%;overflow-y: auto;"
         :key="item.label"
-        :label="item.label"
+        :label="$t(item.label)"
         :name="item.cName"
         :lazy="true">
         <component :is="item.cName"></component>
       </el-tab-pane>
     </el-tabs>
-  </animation-dialog>
+  </easy-dialog>
 </template>
 
 <script lang="ts">
 import { defineComponent, watch, ref, defineAsyncComponent } from 'vue'
 import Loading from '@/components/Tools/Loading.vue'
-import useDialogOption from '@/hooks/useDialogOption'
 export default defineComponent({
   name: 'AuxiliaryConfig',
   components: {
-    FAQ: defineAsyncComponent(() => import('@/components/Axuiliary/FAQ.vue')),
+    FAQ: defineAsyncComponent({
+      loader: () => import('@/components/Axuiliary/FAQ.vue'),
+      loadingComponent: Loading
+    }),
     ImportExport: defineAsyncComponent({
       loader: () => import('@/components/Axuiliary/ImportExport.vue'),
       loadingComponent: Loading,
@@ -42,9 +39,15 @@ export default defineComponent({
       loader: () => import('@/components/Axuiliary/About.vue'),
       loadingComponent: Loading,
     }),
-    ChangeLog: defineAsyncComponent(() => import('@/components/Axuiliary/ChangeLog.vue')),
+    ChangeLog: defineAsyncComponent({
+      loader: () => import('@/components/Axuiliary/ChangeLog.vue'),
+      loadingComponent: Loading
+    }),
+    TabControl: defineAsyncComponent({
+      loader: () => import('@/components/Axuiliary/TabControl.vue'),
+      loadingComponent: Loading
+    }),
     CleanCache: defineAsyncComponent(() => import('@/components/Axuiliary/CleanCache.vue')),
-    TabControl: defineAsyncComponent(() => import('@/components/Axuiliary/TabControl.vue'))
   },
   props: {
     visible: {
@@ -53,12 +56,12 @@ export default defineComponent({
     }
   },
   setup(props, { emit }) {
-    const dialog = ref()
+    const dialogVisible = ref(false)
     watch(() => props.visible, (val) => {
       if (val) {
-        dialog.value.open()
+        dialogVisible.value = true
       } else {
-        dialog.value.close()
+        dialogVisible.value = false
       }
     })
     const close = () => {
@@ -92,24 +95,20 @@ export default defineComponent({
         cName: 'CleanCache'
       }
     ])
-
-    const dialogOptions = useDialogOption()
-
     return {
-      dialog,
+      dialogVisible,
       close,
       tabList,
-      activeName,
-      dialogOptions
+      activeName
     }
   }
 })
 </script>
 <style>
-.animation-dialog-wrapper .auxiliary-config-dialog.dialog .dialog-body{
+.auxiliary-config-dialog .easy-dialog-body{
   padding: 5px 5px 20px!important;
 }
-.animation-dialog-wrapper .auxiliary-config-dialog.dialog .el-tabs__content {
+.auxiliary-config-dialog .easy-dialog-body .el-tabs__content{
   height: 100%;
 }
 </style>

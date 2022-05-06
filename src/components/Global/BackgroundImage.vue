@@ -22,7 +22,7 @@
       ></video>
     </div>
     <div
-      v-if="backgroundURL"
+      v-else-if="backgroundURL"
       :class="['bg-media-wrapper', showBackgroundEffect && 'system-bg-effect']"
     >
       <div :style="`width:100%;height:100%;filter:${filter}`">
@@ -37,7 +37,7 @@
         v-if="showRefreshBtn && backgroundURL.includes('randomPhoto')"
         name="refresh"
         class="btn-refresh"
-        title="刷新背景图"
+        :title="$t('刷新背景图')"
         size="20"
         @click="refresh"
       />
@@ -50,6 +50,7 @@ import { computed, ref, watch } from 'vue'
 import { useStore } from '@/store'
 import { getFileType } from '@/utils'
 import { ElNotification } from 'element-plus'
+import { useI18n } from 'vue-i18n'
 const props = defineProps({
   background: {
     type: String
@@ -59,7 +60,9 @@ const props = defineProps({
   }
 })
 
-const t = ref(+new Date())
+const { t } = useI18n()
+
+const time = ref(+new Date())
 const getURL = (input: string) => {
   const reg = /url\(['"]?(.*?)['"]?\)/
   const match = input.match(reg)
@@ -69,7 +72,7 @@ const getURL = (input: string) => {
 const backgroundURL = computed(() => {
   if (props.background && props.background.includes('url')) {
     let url = getURL(props.background)
-    url += `${url.includes('?') ? '&' : '?'}t=${t.value}`
+    url += `${url.includes('?') ? '&' : '?'}t=${time.value}`
     return url
   }
   return ''
@@ -87,7 +90,7 @@ watch(
       if (duration) {
         timer = setInterval(() => {
           refresh()
-        }, duration * 1000)
+        }, duration < 30 ? 30 * 1000 : duration * 1000)
       }
     }
   },
@@ -113,7 +116,7 @@ const videoURL = computed(() => {
 const bgDom = ref()
 let leaveAnimation: Animation | null = null
 const refresh = async () => {
-  t.value = +new Date()
+  time.value = +new Date()
   if (bgDom.value) {
     if (!bgDom.value.animate) return
   }
@@ -165,11 +168,11 @@ const handleImgLoad = async () => {
 const store = useStore()
 const handleVideoError = () => {
   ElNotification({
-    title: '错误',
+    title: t('错误'),
     type: 'error',
-    message: '动态视频壁纸加载出错，请重试或更换视频源'
+    message: t('动态视频壁纸加载出错，请重试或更换视频源')
   })
-  store.resetGlobalBackground()
+  // store.resetGlobalBackground()
 }
 
 const showBackgroundEffect = computed(() => store.showBackgroundEffect)

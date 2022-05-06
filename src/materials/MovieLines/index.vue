@@ -18,6 +18,11 @@
       :src="componentSetting.posterType === 2 ? wallpaperImg: img"
       :style="{ filter: componentSetting.posterFilter }"
       @load="imgLoad"/>
+    <div
+      v-if="componentSetting.useSpotlight"
+      class="bg-effect-box"
+      :style="bgEffectString"
+    ></div>
     <blockquote
       class="blockquote"
       :style="{
@@ -47,7 +52,8 @@ import { onMounted, onUnmounted, ref, computed, watch } from 'vue'
 import { apiURL } from '@/global'
 import { mapPosition } from '@/plugins/position-selector'
 import { execCopy } from '@/utils'
-import { ElNotification } from 'element-plus';
+import { ElNotification } from 'element-plus'
+import { useI18n } from 'vue-i18n'
 const props = defineProps({
   componentSetting: {
     type: Object,
@@ -59,6 +65,8 @@ const props = defineProps({
   }
 })
 
+const { t } = useI18n()
+
 const linesText = ref()
 const movieText = ref()
 const movieBg = ref()
@@ -68,6 +76,8 @@ const movie = ref('')
 const img = ref('')
 const wallpaperImg = ref('')
 const link = ref('')
+
+const bgEffectString = ref('')
 
 const isReady = ref(false)
 
@@ -89,6 +99,13 @@ const getData = async () => {
       wallpaperImg.value = randomImg
     }
     link.value = _link
+
+    bgEffectString.value = `
+      background-image: radial-gradient(
+        ellipse at ${~~(Math.random() * 50) + 25}% ${~~(Math.random() * 50) + 25}%,
+        rgba(0, 0, 0,.25),
+        rgba(0, 04, 0,.75), 
+        rgb(0, 0, 0));`
   } catch {
     //
   }
@@ -136,9 +153,9 @@ const handleClickAction = () => {
   } else if (props.componentSetting.clickActionType === 3) {
     if (execCopy(lines.value)) {
       ElNotification({
-        title: '提示',
+        title: t('提示'),
         type: 'success',
-        message: '复制成功'
+        message: t('复制成功')
       })
     }
   }
@@ -207,6 +224,14 @@ const handleClickAction = () => {
     left: 0;
     top: 0;
     object-fit: cover;
+  }
+
+  .bg-effect-box {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
   }
 }
 </style>

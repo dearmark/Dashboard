@@ -61,6 +61,8 @@ export default {
     position: 5,
     boxShadow: '0 0 4px #aab2b2',
     boxBackground: 'rgba(255,255,255,0.9)',
+    backdropBlur: false,
+    textColor: '#464650',
     boxRadius: 4,
     maxWidth: 600,
     focusBgAnimation: false,
@@ -111,15 +113,15 @@ export default {
           value: 'value'
         }
       },
-      ...pick(formData, 'position'),
-      boxShadow: {
-        label: '搜索栏阴影',
-        type: 'input',
-        tips: '基于CSS3的box-shadow属性，应输入合法的CSS盒子阴影代码片段'
-      },
+      ...pick(formData, ['position', 'textColor']),
       boxBackground: {
         label: '搜索栏背景',
         slot: () => <standard-color-picker vModel={formData.boxBackground} show-alpha/>
+      },
+      boxShadow: {
+        label: '搜索栏阴影',
+        type: 'input',
+        tips: 'shadowTips'
       },
       boxRadius: {
         label: '搜索栏圆角',
@@ -131,6 +133,15 @@ export default {
           style: 'width: 120px'
         }
       },
+      backdropBlur: {
+        label: '毛玻璃背景',
+        type: 'switch',
+        tips: '是否开启毛玻璃背景，只在搜索栏背景有透明度情况下生效，基于backdrop-filter属性，部分浏览器不支持'
+      },
+      focusBgAnimation: {
+        label: '聚焦背景动画',
+        type: 'switch'
+      },
       maxWidth: {
         label: '最大宽度',
         type: 'input-number',
@@ -140,10 +151,6 @@ export default {
           max: 1920,
           style: 'width: 120px'
         }
-      },
-      focusBgAnimation: {
-        label: '聚焦背景动画',
-        type: 'switch'
       },
       ...pick(formData, 'padding'),
     }

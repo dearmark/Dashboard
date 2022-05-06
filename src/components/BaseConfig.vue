@@ -1,46 +1,40 @@
 <template>
-  <animation-dialog
-    ref="dialog"
-    animationMode
-    :title="editId ? '编辑组件' : '添加组件'"
+  <easy-dialog
+    v-model="dialogVisible"
+    :title="editId ? $t('编辑组件') : $t('添加组件')"
     width="min(800px, 98vw)"
     height="min(600px, 90vh)"
-    appendToBody
-    :closeOnClickOutside="false"
-    listenWindowSizeChange
-    customClass="base-config-dialog"
-    v-bind="dialogOptions"
   >
     <div class="main-config">
       <div class="base-config-wrapper">
-        <div class="config-title">基础配置</div>
+        <div class="config-title">{{$t('基础配置')}}</div>
         <WarnLock />
         <div class="form-wrapper scrollbar1">
           <el-form ref="form" label-position="top" :model="state.formData">
-            <el-form-item label="物料组件">
+            <el-form-item :label="$t('物料组件')">
               <MaterialSelector
                 v-model="state.formData.material"
                 :disabled="!!editId"
                 @change="updateComponentSetting(false)"
               />
             </el-form-item>
-            <el-form-item label="定位模式">
+            <el-form-item :label="$t('定位模式')">
               <el-radio-group
                 v-model="state.formData.position"
                 :disabled="!!editId"
                 style="margin-right: 8px"
               >
-                <el-radio :label="1">栅格模式</el-radio>
-                <el-radio :label="2">Fixed模式</el-radio>
+                <el-radio :label="1">{{$t('栅格模式')}}</el-radio>
+                <el-radio :label="2">{{$t('Fixed模式')}}</el-radio>
               </el-radio-group>
               <Tips>
                 <div style="line-height: 1.5">
-                  <p>栅格模式采用布局栅格化，组件大小响应式，编辑时可更改位置与大小</p>
-                  <p>Fixed模式使用会让组件固定在屏幕相应位置，编辑时可更改位置</p>
+                  <p>{{$t('positionTips1')}}</p>
+                  <p>{{$t('positionTips2')}}</p>
                 </div>
               </Tips>
             </el-form-item>
-            <el-form-item label="Fixed方向" v-if="state.formData.position === 2">
+            <el-form-item :label="$t('Fixed方向')" v-if="state.formData.position === 2">
               <div class="flex-center-y">
                 <PositionSelector
                   v-model="state.formData.affixInfo.mode"
@@ -72,13 +66,13 @@
                 </div>
                 <Tips>
                   <div style="line-height: 1.5">
-                    <p>Fixed定位方向属性，例如想固定到右下角请选右下</p>
-                    <p>在编辑模式下直接拖拽组件也可更改偏移参数。</p>
+                    <p>{{$t('fixedTips1')}}</p>
+                    <p>{{$t('fixedTips2')}}</p>
                   </div>
                 </Tips>
               </div>
             </el-form-item>
-            <el-form-item label="组件尺寸">
+            <el-form-item :label="$t('组件尺寸')">
               <div class="form-row-control">
                 <div class="label">Width</div>
                 <div class="content">
@@ -92,9 +86,9 @@
                   <span class="unit">{{ state.formData.position === 1 ? 'FR' : 'PX' }}</span>
                   <Tips>
                     <div style="line-height: 1.5">
-                      <p>PX为固定宽高模式</p>
-                      <p>FR为响应式设计风格, 单位为屏幕栅格数, 屏幕满屏宽为12份</p>
-                      <p>在编辑模式下拖拽组件右下角箭头也可更改Size</p>
+                      <p>{{$t('sizeUnitTips1')}}</p>
+                      <p>{{$t('sizeUnitTips2')}}</p>
+                      <p>{{$t('sizeUnitTips3')}}</p>
                     </div>
                   </Tips>
                 </div>
@@ -113,7 +107,7 @@
                 </div>
               </div>
             </el-form-item>
-            <el-form-item label="背景">
+            <el-form-item :label="$t('背景')">
               <BackgroundSelector
                 v-model:background="state.formData.background"
                 :w="state.formData.w"
@@ -125,9 +119,9 @@
                 v-model:filter="state.formData.backgroundFilter"
               />
             </el-form-item>
-            <el-form-item label="其他配置">
+            <el-form-item :label="$t('其他配置')">
               <div class="form-row-control">
-                <div class="label">圆角</div>
+                <div class="label">{{$t('圆角')}}</div>
                 <div class="content">
                   <el-input-number
                     v-model="state.formData.borderRadius"
@@ -140,16 +134,16 @@
                 </div>
               </div>
               <div class="form-row-control">
-                <div class="label">阴影</div>
+                <div class="label">{{$t('阴影')}}</div>
                 <div class="content">
                   <el-input
                     style="width: 100%"
                     v-model="state.formData.boxShadow"
                     clearable
-                    placeholder="合法box-shadow, e.g(0 4px #89909c)"
+                    :placeholder="$t('shadowPlaceholder')"
                   />
                 </div>
-                <Tips content="基于CSS3的box-shadow属性，应输入合法的CSS盒子阴影代码片段" />
+                <Tips :content="$t('shadowTips')" />
               </div>
               <div class="form-row-control">
                 <div class="label">zIndex</div>
@@ -162,18 +156,18 @@
                     style="width: 100px"
                   />
                 </div>
-                <Tips content="物料组件的层级Zindex, 若出现组件被阻挡可尝试更改此值" />
+                <Tips :content="$t('zIndexTips')" />
               </div>
               <div class="form-row-control">
-                <div class="label">ID属性注入</div>
+                <div class="label">{{$t('ID属性注入')}}</div>
                 <div class="content">
                   <el-input
                     v-model="state.formData.customId"
-                    placeholder="组件自定义ID"
+                    :placeholder="$t('组件自定义ID')"
                     clearable
                   />
                 </div>
-                <Tips content="组件的自定义ID，一般用于注入CSS或JS代码操作" />
+                <Tips :content="$t('customIdTips')" />
               </div>
             </el-form-item>
           </el-form>
@@ -181,7 +175,7 @@
       </div>
       <div class="component-config-wrapper">
         <div class="config-title">
-          组件配置<span class="material-text">#{{ state.formData.material }}</span>
+          {{$t('组件配置')}}<span class="material-text">#{{ state.formData.material }}</span>
         </div>
         <div class="form-wrapper scrollbar1" v-if="state.formData.componentSetting">
           <StandardForm
@@ -195,11 +189,11 @@
     </div>
     <template #footer>
       <div class="footer" style="text-align: right; padding: 12px">
-        <button class="btn" type="button" @click="close">取消</button>
-        <button class="btn btn-primary" type="button" @click="submit">确认</button>
+        <button class="btn" type="button" @click="close">{{$t('取消')}}</button>
+        <button class="btn btn-primary" type="button" @click="submit">{{$t('确认')}}</button>
       </div>
     </template>
-  </animation-dialog>
+  </easy-dialog>
 </template>
 
 <script lang="ts">
@@ -213,9 +207,9 @@ import Tips from '@/components/Tools/Tips.vue'
 import { useStore } from '@/store'
 import { ElNotification } from 'element-plus'
 import { uid, clone } from '@/utils'
-import useDialogOption from '@/hooks/useDialogOption'
 import StandardForm from '@/plugins/standard-form'
 import Setting from '@/materials/setting'
+import { useI18n } from 'vue-i18n'
 const DEFAULT_SETTING: ComponentOptions = {
   position: 1,
   affixInfo: {
@@ -255,9 +249,11 @@ export default defineComponent({
 
     const editId = ref('')
 
-    const dialog = ref()
+    const { t } = useI18n()
+
+    const dialogVisible = ref(false)
     const open = (_editId: string) => {
-      dialog.value.open()
+      dialogVisible.value = true
       if (_editId) {
         const _getSetting = store.getComponentSetting(_editId)
         state.formData = { ..._getSetting }
@@ -273,7 +269,7 @@ export default defineComponent({
       }
     }
     const close = () => {
-      dialog.value.close()
+      dialogVisible.value = false
     }
 
     const updateComponentSetting = (justFormOnly = false) => {
@@ -310,8 +306,9 @@ export default defineComponent({
       if (store.isLock) {
         store.updateIsLock(false)
         ElNotification({
-          title: '提示',
-          message: '已自动进入编辑模式，编辑模式可进行组件拖拽与右键菜单配置'
+          title: t('提示'),
+          type: 'success',
+          message: t('已自动进入编辑模式，编辑模式可进行组件拖拽与右键菜单配置')
         })
       }
     }
@@ -341,10 +338,7 @@ export default defineComponent({
       state.formData.affixInfo.y = DEFAULT_SETTING.affixInfo?.y
     }
 
-    const dialogOptions = useDialogOption(true)
-
     return {
-      dialog,
       form,
       state,
       submit,
@@ -354,8 +348,8 @@ export default defineComponent({
       affixX,
       affixY,
       handleResetAffix,
-      dialogOptions,
-      updateComponentSetting
+      updateComponentSetting,
+      dialogVisible
     }
   }
 })
@@ -466,11 +460,5 @@ export default defineComponent({
       margin-bottom: 20px;
     }
   }
-}
-</style>
-<style lang="scss">
-.animation-dialog-wrapper .base-config-dialog.dialog .dialog-body {
-  padding: 0 10px !important;
-  margin-top: -10px;
 }
 </style>

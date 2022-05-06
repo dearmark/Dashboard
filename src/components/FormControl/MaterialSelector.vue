@@ -7,25 +7,20 @@
         backgroundImage: `radial-gradient(ellipse closest-side, rgba(0, 0, 0, 0.6), #282c35), url(${activeItem.img})`
       }">
       <div class="label">{{activeItem.label}}</div>
-      <div class="tips">{{activeItem.text}}</div>
+      <div class="tips">{{$t(activeItem.text)}}</div>
     </div>
     <button
       type="button"
       class="btn btn-primary btn-large"
       :disabled="disabled"
       @click="handleOpenSelector"
-      style="margin: 0">选择物料</button>
-    <animation-dialog
-      ref="dialog"
-      animationMode
-      title="选择物料"
+      style="margin: 0">{{$t('选择物料')}}</button>
+    <easy-dialog
+      v-model="dialogVisible"
+      :title="$t('选择物料')"
       width="min(760px, 94vw)"
       height="min(480px, 80vh)"
-      appendToBody
-      :closeOnClickOutside="false"
-      :listenWindowSizeChange="true"
-      @beforeClose="close"
-      v-bind="dialogOptions">
+      @close="close">
       <div class="material-wrapper" v-if="beginLoad">
         <div class="material" v-for="item in materialList" :key="item.value" @click="handleSelect(item)">
           <div class="img-wrapper">
@@ -33,19 +28,18 @@
           </div>
           <div class="content">
             <div class="label">{{item.label}}</div>
-            <div class="tips">{{item.text}}</div>
+            <div class="tips">{{$t(item.text)}}</div>
           </div>
         </div>
         <div class="material-fake" v-for="item in 4" :key="item"></div>
       </div>
-    </animation-dialog>
+    </easy-dialog>
   </div>
 </template>
 
 <script lang="ts">
 import { computed, defineComponent, ref } from 'vue'
 import { MATERIAL_LIST_MAP } from '@/constanst'
-import useDialogOption from '@/hooks/useDialogOption'
 export default defineComponent({
   name: 'MaterialSelector',
   props: {
@@ -61,9 +55,9 @@ export default defineComponent({
   setup(props, { emit }) {
     const beginLoad = ref(false)
 
-    const dialog = ref()
+    const dialogVisible = ref(false)
     const handleOpenSelector = () => {
-      dialog.value.open()
+      dialogVisible.value = true
       if (!beginLoad.value) beginLoad.value = true
     }
     const close = () => {}
@@ -83,20 +77,17 @@ export default defineComponent({
     const handleSelect = (item: (typeof materialList)[number]) => {
       emit('update:modelValue', item.value)
       emit('change')
-      dialog.value.close()
+      dialogVisible.value = false
     }
 
-    const dialogOptions = useDialogOption(true)
-
     return {
-      dialog,
+      dialogVisible,
       handleOpenSelector,
       close,
       materialList,
       activeItem,
       handleSelect,
-      beginLoad,
-      dialogOptions
+      beginLoad
     }
   }
 })

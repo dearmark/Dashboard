@@ -15,7 +15,8 @@ export default {
     padding: 10,
     showDecoration: true,
     themeColor: '#69c0eb',
-    maxWidth: 600
+    maxWidth: 600,
+    useSpotlight: false
   },
   formConf(formData: any) {
     return {
@@ -55,7 +56,7 @@ export default {
         type: 'switch'
       },
       duration: {
-        label: '自动刷新频率',
+        label: '刷新频率',
         type: 'input-number',
         attrs: {
           'controls-position': 'right',
@@ -63,7 +64,7 @@ export default {
           max: 12 * 60,
           style: 'width: 120px'
         },
-        tips: '刷新频率,单位为分钟'
+        tips: 'durationMinuteTips'
       },
       clickActionType: {
         label: '点击文本行为',
@@ -78,7 +79,7 @@ export default {
           label: 'label',
           value: 'value'
         },
-        tips: '配置电影台词区域的点击事件'
+        tips: 'clickMovieLinesActionTypeTips'
       },
       ...pick(formData, [
         'position',
@@ -96,6 +97,12 @@ export default {
         when: (formData: any) => formData.showDecoration,
         label: '装饰线颜色',
         slot: () => <standard-color-picker vModel={formData.themeColor} />
+      },
+      useSpotlight: {
+        when: (formData: any) => formData.showPoster,
+        label: '聚光灯滤镜',
+        type: 'switch',
+        tips: 'spotlightTips'
       },
       maxWidth: {
         label: '盒子最大宽度',
