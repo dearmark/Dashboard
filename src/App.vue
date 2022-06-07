@@ -19,7 +19,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { ref, computed, h } from 'vue'
+import { ref, computed, h, onMounted } from 'vue'
 import Layout from '@/components/Layout.vue'
 import BaseConfig from '@/components/BaseConfig.vue'
 import GooeyMenu from '@/components/GooeyMenu.vue'
@@ -31,6 +31,7 @@ import TabCarousel from './components/Global/TabCarousel.vue'
 import vMouseMenu from '@/plugins/mouse-menu'
 import { useStore } from '@/store'
 import { useI18n } from 'vue-i18n'
+import { loadHarmonyOSFont } from '@/utils'
 import Icon from '@/components/Tools/Icon.vue'
 const store = useStore()
 const global = computed(() => store.global)
@@ -61,6 +62,18 @@ const showGlobalConfig = () => {
 const axuiliaryConfigVisible = ref(false)
 const showAuxiliaryConfig = () => {
   axuiliaryConfigVisible.value = true
+}
+
+const handleDownloadBg = () => {
+  const url = document.querySelector('.global-bg-img')?.getAttribute('src')
+  if (url) {
+    // 当前因非同域名图片不能直接下载，会新窗口打开
+    const a = document.createElement('a')
+    a.setAttribute('href', url)
+    a.setAttribute('download', 'background')
+    a.setAttribute('target', '_blank')
+    a.click()
+  }
 }
 
 const menuList = ref([
@@ -97,6 +110,18 @@ const menuList = ref([
     icon: h(Icon, { name: 'refresh', size: 18 })
   },
   {
+    label: () => t('下载壁纸'),
+    hidden: () => !global.value.background.includes('api/randomPhoto'),
+    fn: () => {
+      handleDownloadBg()
+    },
+    icon: h(Icon, { name: 'download-cloud', size: 18 })
+  },
+  {
+    line: true,
+    hidden: () => !global.value.background.includes('api/randomPhoto')
+  },
+  {
     label: () => (isLock.value ? t('进入编辑') : t('锁定')),
     fn: () => {
       store.updateIsLock(!isLock.value)
@@ -113,6 +138,13 @@ const needShowDefaultThemePicker = computed(() => {
     return true
   } else {
     return false
+  }
+})
+
+onMounted(() => {
+  // 加载鸿蒙字体
+  if (store.global.loadHarmonyOSFont) {
+    loadHarmonyOSFont()
   }
 })
 </script>
