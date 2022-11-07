@@ -36,7 +36,7 @@
       </div>
       <div class="icon-wrapper">
         <Icon
-          v-if="showRefreshBtn && backgroundURL.includes('randomPhoto')"
+          v-if="showRefreshBtn && (backgroundURL.includes('randomPhoto') || backgroundURL.includes('localImg'))"
           name="refresh"
           class="btn-refresh"
           :title="$t('刷新背景图')"
@@ -63,6 +63,7 @@ import { getFileType } from '@/utils'
 import { ElNotification } from 'element-plus'
 import { useI18n } from 'vue-i18n'
 import Icon from '../Tools/Icon.vue'
+import { localImg } from '@/plugins/local-img'
 const props = defineProps({
   background: {
     type: String
@@ -95,7 +96,7 @@ let timer: any
 watch(
   () => props.background,
   (val) => {
-    if (val && val?.includes('randomPhoto')) {
+    if (val && (val.includes('randomPhoto') || val.includes('localImg'))) {
       if (timer) clearInterval(timer)
       const url = getURL(val)
       const _url = new URL(url)
@@ -115,11 +116,11 @@ watch(
   }
 )
 
-const realBackgroundURL = ref(localStorage.getItem('cacheBackgroundURL') || '')
+const realBackgroundURL = computed(() => store.realBackgroundURL)
 watch(
   () => backgroundURL.value,
   async (val) => {
-    if (val && val?.includes('randomPhoto')) {
+    if (val && val.includes('randomPhoto')) {
       try {
         let result
         if (val.includes('personal')) {
@@ -127,10 +128,9 @@ watch(
           const index = ~~(Math.random() * store.wallpaperCollectionList.length)
           result = store.wallpaperCollectionList[index]
           if (result === realBackgroundURL.value) {
-            // 随机出的图片跟原本一直会导致onload不执行
+            // 随机出的图片跟原本一致会导致onload不执行
             // result = 'https://dogefs.s3.ladydaily.com/~/source/unsplash/photo-1612342222980-e549ae573834'
             setTimeout(() => {
-              console.log(bgDom.value, bgDom.value.style.filter)
               if (bgDom.value.style) bgDom.value.style.filter = 'blur(0)'
             }, 500)
           }
@@ -143,15 +143,29 @@ watch(
           const json = await res.json()
           result = json.url
         }
-        realBackgroundURL.value = result
+        store.updateState({ key: 'realBackgroundURL', value: result })
         localStorage.setItem('cacheBackgroundURL', result)
       } catch (e) {
         console.error(e)
-        realBackgroundURL.value = val
+        store.updateState({ key: 'realBackgroundURL', value: val })
         localStorage.removeItem('cacheBackgroundURL')
       }
+    } else if (val && val.includes('localImg')) {
+      const imgList = await localImg.keys()
+      const index = ~~(Math.random() * imgList.length)
+      const result: string | null = await localImg.getItem(imgList[index])
+      if (result) {
+        if (result === realBackgroundURL.value) {
+          setTimeout(() => {
+            if (bgDom.value.style) bgDom.value.style.filter = 'blur(0)'
+          }, 500)
+        }
+        store.updateState({ key: 'realBackgroundURL', value: result })
+      } else {
+        store.updateState({ key: 'realBackgroundURL', value: 'https://dogefs.s3.ladydaily.com/~/source/unsplash/photo-1612342222980-e549ae573834' })
+      }
     } else {
-      realBackgroundURL.value = val
+      store.updateState({ key: 'realBackgroundURL', value: val })
       localStorage.removeItem('cacheBackgroundURL')
     }
   },

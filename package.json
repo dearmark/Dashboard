@@ -1,6 +1,6 @@
 {
   "name": "howdz-dashboard",
-  "version": "1.2.6",
+  "version": "1.2.7",
   "description": "Custom your personal browser start page from some configurable components",
   "author": {
     "name": "leon-kfd",
@@ -92,8 +92,10 @@
     "element-plus": "2.0.1",
     "file-saver": "^2.0.5",
     "js-md5": "^0.7.3",
+    "localforage": "^1.10.0",
     "pinia": "^2.0.11",
     "pinia-plugin-persistedstate": "^1.5.0",
+    "raindrop-fx": "^1.0.8",
     "vue": "^3.2.4",
     "vue-grid-layout": "3.0.0-beta1",
     "vue-i18n": "9",
@@ -131,7 +133,7 @@
     "typescript": "4.1.3",
     "vite": "^2.8.0",
     "vite-plugin-md": "^0.11.4",
-    "vue-tsc": "^0.0.8"
+    "vue-tsc": "^1.0.7"
   },
   "repository": {
     "type": "git",
