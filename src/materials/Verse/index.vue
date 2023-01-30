@@ -1,21 +1,30 @@
 <template>
-  <div class="wrapper" ref="verseElement" :style="{
-    fontSize: componentSetting.textFontSize + 'px',
-    color: componentSetting.textColor,
-    textShadow: componentSetting.textShadow,
-    padding: componentSetting.padding + 'px',
-    fontFamily: componentSetting.fontFamily,
-    ...positionCSS
-  }">
-    {{ verse }}
-    <div class="title" :style="{
-      fontSize: componentSetting.textFontSize * 0.7 + 'px',
+  <div
+    class="wrapper"
+    ref="verseElement"
+    :style="{
+      fontSize: componentSetting.textFontSize + 'px',
       color: componentSetting.textColor,
       textShadow: componentSetting.textShadow,
       padding: componentSetting.padding + 'px',
       fontFamily: componentSetting.fontFamily,
       ...positionCSS
-    }">{{ title }}</div>
+    }"
+  >
+    {{ verse }}
+    <div
+      class="title"
+      :style="{
+        fontSize: componentSetting.textFontSize * 0.7 + 'px',
+        color: componentSetting.textColor,
+        textShadow: componentSetting.textShadow,
+        padding: componentSetting.padding + 'px',
+        fontFamily: componentSetting.fontFamily,
+        ...positionCSS
+      }"
+    >
+      {{ title }}
+    </div>
   </div>
 </template>
 
@@ -26,6 +35,7 @@ import { execCopy } from '@/utils'
 import { ElNotification } from 'element-plus'
 import { useStore } from '@/store'
 import { useI18n } from 'vue-i18n'
+import { apiURL } from '@/global'
 export default defineComponent({
   name: 'Verse',
   props: {
