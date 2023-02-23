@@ -35,7 +35,7 @@ import { execCopy } from '@/utils'
 import { ElNotification } from 'element-plus'
 import { useStore } from '@/store'
 import { useI18n } from 'vue-i18n'
-import { apiURL } from '@/global'
+// import { apiURL } from '@/global'
 export default defineComponent({
   name: 'Verse',
   props: {
