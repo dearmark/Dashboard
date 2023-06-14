@@ -1,6 +1,6 @@
 {
   "name": "howdz-dashboard",
-  "version": "1.3.1",
+  "version": "1.3.2",
   "description": "Custom your personal browser start page from some configurable components",
   "author": {
     "name": "leon-kfd",
@@ -53,7 +53,7 @@
     "@milkdown/preset-gfm": "5.3.1",
     "@milkdown/theme-nord": "5.3.1",
     "dayjs": "^1.10.4",
-    "element-plus": "2.0.1",
+    "element-plus": "2.3.6",
     "file-saver": "^2.0.5",
     "js-md5": "^0.7.3",
     "localforage": "^1.10.0",
@@ -93,6 +93,7 @@
     "eslint-plugin-vue": "^7.0.0-0",
     "husky": "^7.0.2",
     "rimraf": "^3.0.2",
+    "rollup-plugin-visualizer": "^5.9.0",
     "sass": "^1.41.0",
     "typescript": "4.1.3",
     "vite": "^2.8.0",

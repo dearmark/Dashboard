@@ -4,6 +4,7 @@ import Vue from '@vitejs/plugin-vue'
 import VueJSX from '@vitejs/plugin-vue-jsx'
 import Markdown from 'vite-plugin-md'
 import vueI18n from '@intlify/vite-plugin-vue-i18n'
+import { visualizer } from 'rollup-plugin-visualizer'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -33,6 +34,7 @@ export default defineConfig({
       scss: {
         charset: false,
         additionalData: '@use "@/assets/element-variables" as *;'
+        // additionalData: "@import '@/assets/variables.scss';"
       }
     }
   },
@@ -45,7 +47,8 @@ export default defineConfig({
     Markdown(),
     vueI18n({
       include: resolve(__dirname, 'src/lang/**')
-    })
+    }),
+    visualizer()
   ],
   build: {
     outDir: process.env.VITE_APP_BUILD_MODE === 'crx' ? 'crx' : 'dist'
