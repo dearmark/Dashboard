@@ -69,7 +69,7 @@
           <Icon name="search" />
         </div>
       </div>
-      <transition name="fadeInUp">
+      <transition name="fadeInUp" :css="!isLowPreformance">
         <div
           v-show="showEngine"
           ref="engineSelector"
@@ -103,25 +103,23 @@
           </div>
         </div>
       </transition>
-      <transition name="fadeInUp">
+      <transition name="fadeInUp" :css="!isLowPreformance">
         <div
           v-if="linkSearchArr.length > 0"
           class="link-search-wrapper"
           :style="{ backdropFilter: componentSetting.backdropBlur ? 'blur(10px) brightness(0.8)' : 'none'}">
-          <temaplte v-if="bookmarkLink && bookmarkLink.length > 0">
-            <div class="bookmark-link-wrapper">
-              <div class="title">{{$t('来自书签')}}</div>
-              <div class="link-list">
-                <div class="link-list-item" v-for="(item,index) in bookmarkLink" :key="item.title + index" @click="handleLinkBookmarkJump(item)">
-                  <img v-if="item.iconType === 'network'" :src="item.iconPath" alt="" />
-                  <div v-if="item.iconType === 'text'" class="no-icon">
-                    {{ item.iconText || item.title.slice(0, 1) }}
-                  </div>
-                  <div class="tile-title">{{ item.title }}</div>
+          <div v-if="bookmarkLink && bookmarkLink.length > 0" class="bookmark-link-wrapper">
+            <div class="title">{{$t('来自书签')}}</div>
+            <div class="link-list">
+              <div class="link-list-item" v-for="(item,index) in bookmarkLink" :key="(item.title || '') + index" @click="handleLinkBookmarkJump(item)">
+                <img v-if="item.iconType === 'network'" :src="item.iconPath" alt="" />
+                <div v-if="item.iconType === 'text'" class="no-icon">
+                  {{ item.iconText || item.title?.slice(0, 1) }}
                 </div>
+                <div class="tile-title">{{ item.title }}</div>
               </div>
             </div>
-          </temaplte>
+          </div>
           <div
             class="link-search-item"
             :class="{ active: linkSearchArrActive === index }"
@@ -140,7 +138,7 @@
           </div>
         </div>
       </transition>
-      <transition name="fadeInUp">
+      <transition name="fadeInUp" :css="!isLowPreformance">
         <div class="tab-tooltips" v-show="showTabTips">
           <div class="main">{{$t('按Tab键可快速切换搜索引擎')}}</div>
           <div class="no-more" @click.stop="hanldeNoShowMore">{{$t('不再提示')}}</div>
@@ -171,6 +169,7 @@ const props = defineProps({
   }
 })
 const store = useStore()
+const isLowPreformance = computed(() => store.global.disabledDialogAnimation)
 
 const activeEngine = ref(0)
 const showEngine = ref(false)
@@ -342,7 +341,7 @@ async function linkSearch() {
       const findBookMarkMaterial = store.list.find((c: ComponentOptions) => c.material === 'Bookmark') || store.affix.find((c: ComponentOptions) => c.material === 'Bookmark')
       if (findBookMarkMaterial) {
         const bookmarkList: Bookmark[] = []
-        findBookMarkMaterial.componentSetting.bookmark.map((b: Bookmark) => {
+        findBookMarkMaterial.componentSetting?.bookmark.map((b: Bookmark) => {
           if (b.type === 'folder' && b.children && b.children.length > 0) {
             bookmarkList.push(...b.children)
           } else {

@@ -1,16 +1,16 @@
 <template>
   <teleport to="body">
-    <transition name="zoomIn">
+    <transition name="zoomIn" :css="!isLowPreformance">
       <div
         v-if="visible"
         ref="actionPopover"
         class="action-popover"
         :class="popoverCustomClass"
         :style="{
-          width: rectInfo.width + 'px',
-          height: rectInfo.height + 'px',
-          top: rectInfo.top + 'px',
-          left: rectInfo.left + 'px',
+          width: `min(${rectInfo.width}px, 90vw)`,
+          height: `min(${rectInfo.height}px, 90vh)`,
+          top: `${rectInfo.top}px`,
+          left: `${rectInfo.left}px`,
           transformOrigin: transformOriginStr,
           zIndex: zIndex
         }">
@@ -23,8 +23,9 @@
   </teleport>
 </template>
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
 import { getPopoverActivePointByDirection } from '@/utils/direction'
+import { useStore } from '@/store'
 const props = defineProps({
   popoverCustomClass: {
     type: String
@@ -43,6 +44,9 @@ const emit = defineEmits(['opened', 'closed', 'startClose'])
 const visible = ref(false)
 const isCenterDirection = ref(false)
 const transformOriginStr = ref('')
+
+const store = useStore()
+const isLowPreformance = computed(() => store.global.disabledDialogAnimation)
 
 // clickOutside
 const actionPopover = ref()
