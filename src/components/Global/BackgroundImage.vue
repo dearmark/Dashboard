@@ -1,6 +1,6 @@
 <template>
   <div
-    class="wrapper"
+    class="bg-img-wrapper"
     :style="{
       background: !backgroundURL ? background : 'none'
     }"
@@ -22,13 +22,26 @@
         }"
       ></video>
     </div>
+    <div v-else-if="iframeURL" :class="['bg-media-wrapper', showBackgroundEffect && 'system-bg-effect']">
+      <iframe 
+        class="bg-iframe" 
+        :src="iframeURL" 
+        frameborder="0"
+        :style="{
+          width: '100%',
+          height: '100%',
+          pointerEvents: isLock ? 'all' : 'none'
+        }"
+      ></iframe>
+    </div>
     <div
       v-else-if="realBackgroundURL"
       :class="['bg-media-wrapper', showBackgroundEffect && 'system-bg-effect']"
     >
-      <div :style="`width:100%;height:100%;filter:${filter}`">
+      <div class="bg-media-filter" :style="`width:100%;height:100%;filter:${filter}`">
         <img
           class="global-bg-img"
+          :crossorigin="imgCrossorigin"
           :src="realBackgroundURL"
           style="width: 100%; height: 100%; object-fit: cover; opacity: 0"
           ref="bgDom"
@@ -67,12 +80,13 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watch, onMounted } from 'vue'
 import { useStore } from '@/store'
 import { ElNotification } from 'element-plus'
 import { useI18n } from 'vue-i18n'
 import Icon from '../Tools/Icon.vue'
-import { localImg } from '@/plugins/local-img'
+import { isSupportIndexDB, localImg, cacheBackgroundImg, setCacheBgImg } from '@/plugins/local-img'
+import request from '@/utils/request'
 const props = defineProps({
   background: {
     type: String
@@ -128,67 +142,94 @@ watch(
 )
 
 const realBackgroundURL = computed(() => store.realBackgroundURL)
+
+const imgCrossorigin = computed(() => {
+  if(props.background && props.background.includes('randomPhoto')) return 'anonymous'
+  return undefined
+})
+
 watch(
   () => backgroundURL.value,
-  async (val) => {
-    if (val && val.includes('randomPhoto')) {
-      try {
-        let result
-        if (val.includes('personal')) {
-          // 从个人壁纸库随机一张
-          const index = ~~(Math.random() * store.wallpaperCollectionList.length)
-          result = store.wallpaperCollectionList[index]
-          if (result === realBackgroundURL.value) {
-            // 随机出的图片跟原本一致会导致onload不执行
-            // result = 'https://dogefs.s3.ladydaily.com/~/source/unsplash/photo-1612342222980-e549ae573834'
-            setTimeout(() => {
-              if (bgDom.value.style) bgDom.value.style.filter = 'blur(0)'
-            }, 500)
-          }
-        } else {
-          let target = val
-          if (import.meta.env.DEV) {
-            target = target.replace('https://kongfandong.cn', '/api') // For Dev Proxy
-          }
-          const res = await fetch(`${target}&json=1`)
-          const json = await res.json()
-          result = json.url
-        }
-        store.updateState({ key: 'realBackgroundURL', value: result })
-        localStorage.setItem('cacheBackgroundURL', result)
-      } catch (e) {
-        console.error(e)
-        store.updateState({ key: 'realBackgroundURL', value: val })
-        localStorage.removeItem('cacheBackgroundURL')
-      }
-    } else if (val && val.includes('localImg')) {
-      const imgList = await localImg.keys()
-      const index = ~~(Math.random() * imgList.length)
-      const result: string | null = await localImg.getItem(imgList[index])
-      if (result) {
+  () => updateBackground()
+)
+let directToUnsplash = true // 是否直连到Unsplash获取随机图
+const updateBackground = async () => {
+  const val = backgroundURL.value
+  if (val && val.includes('randomPhoto')) {
+    try {
+      let result
+      if (val.includes('personal')) {
+        // 从个人壁纸库随机一张
+        const index = ~~(Math.random() * store.wallpaperCollectionList.length)
+        result = store.wallpaperCollectionList[index]
         if (result === realBackgroundURL.value) {
+          // 随机出的图片跟原本一致会导致onload不执行
           setTimeout(() => {
             if (bgDom.value.style) bgDom.value.style.filter = 'blur(0)'
           }, 500)
         }
-        store.updateState({ key: 'realBackgroundURL', value: result })
       } else {
-        store.updateState({ key: 'realBackgroundURL', value: 'https://dogefs.s3.ladydaily.com/~/source/unsplash/photo-1612342222980-e549ae573834' })
+        let target = val
+        if (import.meta.env.DEV) target = target.replace('https://kongfandong.cn', '') // For Dev Proxy
+        // Unsplash优先使用直连获取
+        if (target.includes('keyword=') && directToUnsplash) {
+          try {
+            const search = new URLSearchParams(target.split('?')[1])
+            const keyword = search.get('keyword')
+            const w = search.get('w')
+            const h = search.get('h')
+            const isMirror = search.get('type') === 'mirror'
+            const directURL = `https://source.unsplash.com/random/${w}x${h}/?${keyword}`
+            const res = await request({ url: directURL, method: 'head', return: 'response' })
+            result = isMirror ? res.url.replace('images.unsplash.com', 'dogefs.s3.ladydaily.com/~/source/unsplash') :res.url
+          } catch {
+            directToUnsplash = false // 当直连Unsplash失败时直接API接口
+            const res = await request({ url: `${target}&json=1` })
+            result = res.url
+          }
+        } else {
+          const res = await request({ url: `${target}&json=1` })
+          result = res.url
+        }
       }
-    } else {
+      store.updateState({ key: 'realBackgroundURL', value: result })
+    } catch (e) {
+      console.error(e)
       store.updateState({ key: 'realBackgroundURL', value: val })
-      localStorage.removeItem('cacheBackgroundURL')
     }
-  },
-  {
-    immediate: true
+  } else if (val && val.includes('localImg')) {
+    const imgList = await localImg.keys()
+    const index = ~~(Math.random() * imgList.length)
+    const result: string | null = await localImg.getItem(imgList[index])
+    if (result) {
+      if (result === realBackgroundURL.value) {
+        setTimeout(() => {
+          if (bgDom.value.style) bgDom.value.style.filter = 'blur(0)'
+        }, 500)
+      }
+      store.updateState({ key: 'realBackgroundURL', value: result })
+    } else {
+      store.updateState({ key: 'realBackgroundURL', value: 'https://dogefs.s3.ladydaily.com/~/source/unsplash/photo-1612342222980-e549ae573834' })
+    }
+  } else {
+    store.updateState({ key: 'realBackgroundURL', value: val })
   }
-)
+}
 
 const videoURL = computed(() => {
   if (props.background && props.background.includes('url')) {
     const url = getURL(props.background)
     if (['.mp4', '.webm', '.flv', '.avi', 'video'].some(item => url.includes(item))) {
+      return url
+    }
+  }
+  return ''
+})
+
+const iframeURL = computed(() => {
+  if (props.background && props.background.includes('url')) {
+    const url = getURL(props.background)
+    if (['.html', 'static.howdz.xyz', 'iframe='].some(item => url.includes(item))) {
       return url
     }
   }
@@ -224,8 +265,13 @@ const refresh = async () => {
     console.log('cancel')
   }
 }
+
 const handleImgLoad = async () => {
   if (bgDom.value) {
+    // Set cache background to indexDB when is in random photo mode
+    if (backgroundURL.value && backgroundURL.value.includes('randomPhoto') && isSupportIndexDB) {
+      setCacheBgImg(bgDom.value)
+    }
     if (bgDom.value.style) bgDom.value.style.opacity = 1
     if (!bgDom.value.animate) return
     if (leaveAnimation) leaveAnimation.cancel()
@@ -248,12 +294,13 @@ const handleImgLoad = async () => {
 }
 
 let loadFirstError = false
-const hanleImgError = () => {
-  const localCacheImg = localStorage.getItem('cacheBackgroundURL')
-  if (!loadFirstError && localCacheImg) {
+const hanleImgError = async () => {
+  if (loadFirstError) return
+  if (isSupportIndexDB) {
+    const localCacheImg = await cacheBackgroundImg.getItem('img')
     store.updateState({ key: 'realBackgroundURL', value: localCacheImg })
-    loadFirstError = true
   }
+  loadFirstError = true
 }
 
 const handleVideoError = () => {
@@ -262,7 +309,6 @@ const handleVideoError = () => {
     type: 'error',
     message: t('动态视频壁纸加载出错，请重试或更换视频源')
   })
-  // store.resetGlobalBackground()
 }
 
 const like = () => {
@@ -294,13 +340,29 @@ const hasLike = computed(() => {
 
 const showBackgroundEffect = computed(() => store.showBackgroundEffect)
 const showRefreshBtn = computed(() => store.showRefreshBtn)
+const isLock = computed(() => store.isLock)
+
+onMounted(async () => {
+  let localCacheImg: string | null = ''
+  if (props.background && props.background.includes('randomPhoto') && isSupportIndexDB) {
+    localCacheImg = await cacheBackgroundImg.getItem('img')
+  }
+  if (localCacheImg) {
+    store.updateState({ key: 'realBackgroundURL', value: localCacheImg })
+    setTimeout(() => {
+      updateBackground()
+    }, 1000)
+  } else {
+    updateBackground()
+  }
+})
 
 defineExpose({
   refresh
 })
 </script>
 <style lang="scss" scoped>
-.wrapper {
+.bg-img-wrapper {
   position: absolute;
   width: 100%;
   height: 100%;

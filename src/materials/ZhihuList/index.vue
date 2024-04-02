@@ -39,9 +39,12 @@
       <div class="list" v-else>
         <div class="list-item" v-for="item in list" :key="item.title">
           <div class="title">
-            <a :href="item.link" target="_blank" :style="!isLock ? 'pointer-events: none' : ''">{{
-              item.title
-            }}</a>
+            <a 
+              :href="item.link" 
+              target="_blank" 
+              :style="!isLock ? 'pointer-events: none' : ''"
+              :title="item.title"
+            >{{item.title}}</a>
           </div>
           <div class="like">🔥{{ item.hot }}</div>
         </div>
@@ -52,9 +55,9 @@
 
 <script lang="ts" setup>
 import { onMounted, ref, computed, onUnmounted, watch } from 'vue'
-import { apiURL } from '@/global'
 import { useStore } from '@/store'
 import { mapPosition } from '@/plugins/position-selector'
+import request from '@/utils/request'
 const props = defineProps({
   componentSetting: {
     type: Object,
@@ -71,8 +74,7 @@ const getList = async () => {
   try {
     loading.value = true
     error.value = false
-    const res = await fetch(`${apiURL}/api/zhihuList?limit=${props.componentSetting.limit || 10}`)
-    const { list: _list } = await res.json()
+    const { list: _list } = await request({ url: `/api/zhihuList?limit=${props.componentSetting.limit || 10}` })
     list.value = _list.map((item: any) => {
       return {
         title: item.title,

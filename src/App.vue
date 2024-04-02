@@ -2,7 +2,7 @@
   <div
     class="page"
     :style="global.globalFontFamily && `font-family: ${global.globalFontFamily}`"
-    v-mouse-menu="{ menuList, drop: () => isMobile, iconType: 'vnode-icon' }"
+    v-mouse-menu="{ menuList,  drop: () => isMobile, iconType: 'vnode-icon' }"
   >
     <BackgroundImage :background="global.background" :filter="global.backgroundFilter" ref="bg" />
     <BackgroundEffect />
@@ -34,8 +34,9 @@ import TabCarousel from './components/Global/TabCarousel.vue'
 import vMouseMenu from '@/plugins/mouse-menu'
 import { useStore } from '@/store'
 import { useI18n } from 'vue-i18n'
-import { loadHarmonyOSFont } from '@/utils'
+import { uid, loadHarmonyOSFont } from '@/utils'
 import Icon from '@/components/Tools/Icon.vue'
+import { ElNotification } from 'element-plus'
 const store = useStore()
 const global = computed(() => store.global)
 const isLock = computed(() => store.isLock)
@@ -125,6 +126,30 @@ const menuList = ref([
     hidden: () => !global.value.background.includes('api/randomPhoto')
   },
   {
+    label: () => t('粘贴'),
+    hidden: () => isLock.value,
+    fn: async () => {
+      try {
+        const res = await navigator.clipboard.readText()
+        const componentData = JSON.parse(res)
+        if (componentData.material && componentData.componentSetting) {
+          // Fixed模式的组件粘贴时更改下位置防止重叠看不出来
+          if (componentData.position === 2) {
+            componentData.affixInfo.x = componentData.affixInfo?.x + 20
+            componentData.affixInfo.y = componentData.affixInfo?.y + 20
+          }
+          store.addComponent({ ...componentData, i: uid() })
+        } else {
+          throw new Error('Not Howdz component data')
+        }
+      } catch (e) {
+        ElNotification({ title: t('粘贴异常'), type: 'error', message: t('请检查权限授权或复制的数据是否正确')})
+        console.error(e)
+      }
+    },
+    icon: h(Icon, { name: 'clipboard', size: 18 })
+  },
+  {
     label: () => (isLock.value ? t('进入编辑') : t('锁定')),
     fn: () => {
       store.updateIsLock(!isLock.value)
@@ -136,6 +161,8 @@ const menuList = ref([
 
 const needShowDefaultThemePicker = computed(() => {
   if (store.tabList && store.tabList.length > 1) return false
+  const isPreviewMode = location.href.includes('preview=')
+  if (isPreviewMode) return false
   const config = JSON.parse(localStorage.getItem('config') || '{}')
   if ((!config.list || config.list.length === 0) && (!config.affix || config.affix.length === 0)) {
     return true

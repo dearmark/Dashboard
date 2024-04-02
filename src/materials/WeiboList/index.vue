@@ -32,9 +32,12 @@
             <img v-if="item.num" :src="item.num" style="width: 100%; height: 100%" />
           </div>
           <div class="title">
-            <a :href="item.link" target="_blank" :style="!isLock ? 'pointer-events: none' : ''">{{
-              item.title
-            }}</a>
+            <a 
+              :href="item.link" 
+              target="_blank" 
+              :style="!isLock ? 'pointer-events: none' : ''"
+              :title="item.title"
+            >{{item.title}}</a>
           </div>
           <div class="count" v-if="item.count">{{ item.count }}w</div>
           <div class="icon" style="width: 24px; height: 24px">
@@ -48,9 +51,9 @@
 
 <script lang="ts" setup>
 import { onMounted, ref, computed, onUnmounted, watch } from 'vue'
-import { apiURL } from '@/global'
 import { useStore } from '@/store'
 import { mapPosition } from '@/plugins/position-selector'
+import request from '@/utils/request'
 const props = defineProps({
   componentSetting: {
     type: Object,
@@ -67,8 +70,7 @@ const getList = async () => {
   try {
     loading.value = true
     error.value = false
-    const res = await fetch(`${apiURL}/api/weiboList?limit=${props.componentSetting.limit || 10}`)
-    const { list: _list } = await res.json()
+    const { list: _list } = await request({ url: `/api/weiboList?limit=${props.componentSetting.limit || 10}` })
     list.value = _list.map((item: any) => {
       return {
         num: item.pic,

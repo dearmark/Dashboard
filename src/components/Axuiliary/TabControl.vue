@@ -15,18 +15,24 @@
             <button v-if="item.selected" class="operation btn btn-small btn-info" disabled>
               {{$t('当前应用')}}
             </button>
-            <template v-else>
-              <button class="operation btn btn-small btn-warning" @click="handleSelected(item.id)">
-                {{$t('应用')}}
-              </button>
-              <button
-                class="operation btn btn-small btn-danger"
-                style="margin-left: 10px"
-                @click="handleDel(item.id)"
-              >
-                {{$t('删除')}}
-              </button>
-            </template>
+            <button v-if="!item.selected" class="operation btn btn-small btn-primary" @click="handleSelected(item.id)">
+              {{$t('应用')}}
+            </button>
+            <button
+              class="operation btn btn-small btn-warning"
+              style="margin-left: 4px"
+              @click="handleCopy(item)"
+            >
+              {{$t('复制')}}
+            </button>
+            <button
+              v-if="!item.selected"
+              class="operation btn btn-small btn-danger"
+              style="margin-left: 4px"
+              @click="handleDel(item.id)"
+            >
+              {{$t('删除')}}
+            </button>
           </div>
         </div>
         <div class="btn-add-wrapper">
@@ -40,16 +46,20 @@
     <div class="title" style="margin-top: 20px">{{$t('其他设置')}}</div>
     <div class="content">
       <el-form label-width="110px">
-        <el-form-item :label="$t('展示切换按钮')">
-          <div class="flex-center-y" style="height: 100%">
-            <el-switch v-model="showTabSwitchBtn"></el-switch>
-            <Tips :content="$t('tabsSwitchBtnTips')" />
-          </div>
-        </el-form-item>
         <el-form-item :label="$t('方向键切换')">
           <div class="flex-center-y" style="height: 100%">
             <el-switch v-model="enableKeydownSwitchTab"></el-switch>
             <Tips :content="$t('tabsKeyboardSwitchTips')" />
+          </div>
+        </el-form-item>
+        <el-form-item :label="$t('展示切换按钮')">
+          <div class="flex-center-y" style="height: 100%">
+            <el-select v-model="showTabSwitchBtn">
+              <el-option :value="false" :label="$t('隐藏')"></el-option>
+              <el-option :value="true" :label="$t('显示(默认样式)')"></el-option>
+              <el-option :value="2" :label="$t('显示(文字样式)')"></el-option>
+            </el-select>
+            <Tips :content="$t('tabsSwitchBtnTips')" />
           </div>
         </el-form-item>
       </el-form>
@@ -106,7 +116,31 @@ const handleAdd = () => {
     }
   }
   const _tabList = JSON.parse(JSON.stringify(tabList.value))
-  if (_tabList.length > 6) {
+  if (_tabList.length > 10) {
+    alert(t('标签页已达上限，无法添加'))
+    return
+  }
+  _tabList.push(newTab)
+  store.updateTabList(_tabList)
+}
+
+const handleCopy = (item: any) => {
+  console.log('item', item)
+  let newTab
+  if (item.selected) {
+    const { list, affix, global, showBackgroundEffect, showRefreshBtn } = store
+    newTab = {
+      id: uid(),
+      name: item.name,
+      selected: false,
+      data: { list, affix, global, showBackgroundEffect, showRefreshBtn }
+    }
+  } else {
+    newTab = JSON.parse(JSON.stringify(item))
+    newTab.id = uid()
+  }
+  const _tabList = JSON.parse(JSON.stringify(tabList.value))
+  if (_tabList.length > 10) {
     alert(t('标签页已达上限，无法添加'))
     return
   }
@@ -131,13 +165,13 @@ const handleSelected = (id: string) => {
 
 const showTabSwitchBtn = computed({
   get: () => store.showTabSwitchBtn,
-  set: (value: boolean) => {
+  set: (value) => {
     store.updateState({ key: 'showTabSwitchBtn', value })
   }
 })
 const enableKeydownSwitchTab = computed({
   get: () => store.enableKeydownSwitchTab,
-  set: (value: boolean) => {
+  set: (value) => {
     store.updateState({ key: 'enableKeydownSwitchTab', value })
   }
 })
@@ -210,6 +244,18 @@ const enableKeydownSwitchTab = computed({
         margin-top: 20px;
       }
     }
+  }
+}
+@media screen and (max-width: 500px) {
+  .wrapper {
+    padding: 8px;
+  }
+  .wrapper .content .list-wrapper .item {
+    padding: 4px 6px;
+    padding-left: 8px;
+  }
+  .wrapper .content .list-wrapper .item .operation-wrapper .operation {
+    padding: 8px;
   }
 }
 </style>

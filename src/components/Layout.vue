@@ -1,5 +1,5 @@
 <template>
-  <div v-if="windowWidth > 0" class="wrapper" :style="`width: ${windowWidth}px;`">
+  <div v-if="windowWidth > 0" class="grid-wrapper" :style="`width: ${windowWidth}px;`">
     <grid-layout
       v-model:layout="list"
       :col-num="12"
@@ -12,6 +12,7 @@
     >
       <grid-item
         v-for="item in list"
+        :class="[`grid-item-${item.material}`]"
         :x="item.x"
         :y="item.y"
         :w="item.w"
@@ -164,6 +165,8 @@ import useScreenMode from '@/hooks/useScreenMode'
 import Loading from '@/components/Tools/Loading.vue'
 import Icon from '@/components/Tools/Icon.vue'
 import { useI18n } from 'vue-i18n'
+import { ElNotification } from 'element-plus'
+import { uid } from '@/utils'
 export default defineComponent({
   name: 'Layout',
   components: {
@@ -263,6 +266,44 @@ export default defineComponent({
           store.updateIsLock(true)
         },
         icon: h(Icon, { name: 'lock', size: 18 })
+      },
+      {
+        line: true
+      },
+      {
+        label: () => t('复制'),
+        fn: async (params: ComponentOptions) => {
+          try {
+            await navigator.clipboard.writeText(JSON.stringify(params, null, 2))
+          } catch (e) {
+            ElNotification({ title: t('复制异常'), type: 'error', message: t('请检查权限授权')})
+            console.error(e)
+          }
+        },
+        icon: h(Icon, { name: 'copy', size: 18 })
+      },
+      {
+        label: () => t('粘贴'),
+        fn: async () => {
+          try {
+            const res = await navigator.clipboard.readText()
+            const componentData = JSON.parse(res)
+            if (componentData.material && componentData.componentSetting) {
+              // Fixed模式的组件粘贴时更改下位置防止重叠看不出来
+              if (componentData.position === 2) {
+                componentData.affixInfo.x = componentData.affixInfo?.x + 20
+                componentData.affixInfo.y = componentData.affixInfo?.y + 20
+              }
+              store.addComponent({ ...componentData, i: uid() })
+            } else {
+              throw new Error('Not Howdz component data')
+            }
+          } catch (e) {
+            ElNotification({ title: t('粘贴异常'), type: 'error', message: t('请检查权限授权或复制的数据是否正确')})
+            console.error(e)
+          }
+        },
+        icon: h(Icon, { name: 'clipboard', size: 18 })
       },
       {
         line: true
@@ -370,7 +411,7 @@ export default defineComponent({
 })
 </script>
 <style lang="scss" scoped>
-.wrapper {
+.grid-wrapper {
   zoom: 1;
   &:after {
     content: '';

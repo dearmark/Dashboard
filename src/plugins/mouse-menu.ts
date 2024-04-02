@@ -39,9 +39,11 @@ function removeLongPressListener(el: HTMLElement) {
 let mouseDownEvent: any;
 let longPressEvent: any;
 const mounted = (el: HTMLElement, binding: any) => {
+  const store = useStore()
+  const lang = store.global.lang
   const { value } = binding;
   const options = {
-    width: 160,
+    width: lang === 'en' ? 200: 160,
     menuList: [],
     hasIcon: true,
     iconType: 'font-icon',
@@ -49,7 +51,7 @@ const mounted = (el: HTMLElement, binding: any) => {
   };
   const menuWrapperCss = {
     background: '#ffffff',
-    borderRadius: '6px',
+    borderRadius: '8px',
     padding: '8px 6px',
     boxShadow: '0 2px 12px 0 rgba(0,0,0,.1)',
     lineColor: '#eee',

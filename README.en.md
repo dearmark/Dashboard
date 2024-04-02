@@ -13,7 +13,7 @@ Written in `Vue3`, `Vite`, `Typescript`.
 
 - [Online Website #1](https://howdz.xyz/)
 - [Online Website #2](https://s.kongfandong.cn/)
-- [Chrome Extension](https://chrome.google.com/webstore/detail/howdz%E8%B5%B7%E5%A7%8B%E9%A1%B5/ggglfehkglgpenacfalffmiojghklamm/related)
+- [Chrome Extension](https://chromewebstore.google.com/detail/howdz%E8%B5%B7%E5%A7%8B%E9%A1%B5/ggglfehkglgpenacfalffmiojghklamm)
 - [Edge Extension](https://microsoftedge.microsoft.com/addons/detail/howdz%E8%B5%B7%E5%A7%8B%E9%A1%B5/cgcggcdgjfmeoemmdpleinicgepijegd)
 
 ## Feature
@@ -79,4 +79,4 @@ The project's non-database interface is on open source，it's based on `Deno`
 
 All for [MIT](https://github.com/leon-kfd/Dashboard/blob/main/LICENSE)
 
-Copyright (c) 2023 Leon.D
+Copyright (c) 2024 Leon.D

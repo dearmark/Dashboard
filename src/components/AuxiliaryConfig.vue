@@ -69,6 +69,8 @@ export default defineComponent({
       emit('update:visible', false)
     }
 
+    const isPreviewMode = location.href.includes('preview=')
+
     const activeName = ref('TabControl')
     const tabList = ref([
       {
@@ -95,10 +97,10 @@ export default defineComponent({
         label: '更新日志',
         cName: 'ChangeLog'
       },
-      {
+      ...(isPreviewMode ? [] : [{
         label: '清除数据',
         cName: 'CleanCache'
-      }
+      }])
     ])
     return {
       dialogVisible,
@@ -115,5 +117,13 @@ export default defineComponent({
 }
 .auxiliary-config-dialog .easy-dialog-body .el-tabs__content{
   height: 100%;
+}
+@media screen and (max-width: 500px) {
+  .auxiliary-config-dialog .easy-dialog-body .el-tabs--left .el-tabs__header.is-left{
+    margin-right: 0;
+  }
+  .auxiliary-config-dialog .easy-dialog-body .el-tabs__item {
+    padding: 0 8px;
+  }
 }
 </style>

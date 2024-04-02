@@ -16,14 +16,14 @@
           @click="onSelect(item.value)"
           >
           <div class="img-wrapper">
-            <img v-if="item.img" :src="item.img" :alt="item.name">
+            <img v-if="item.img" :src="item.img" :alt="item.name" loading="lazy">
           </div>
-          <div class="effect-name">{{item.name}}</div>
+          <div class="effect-name">{{$t(item.name)}}</div>
         </div>
       </div>
     </div>
     <div class="footer">
-      <button class="btn btn-primary" @click="onSubmit">应用</button>
+      <button class="btn btn-primary" @click="onSubmit">{{$t('应用')}}</button>
     </div>
   </div>
 </template>
@@ -56,15 +56,21 @@ const effectList = ref([
     img: 'https://cdn.kongfandong.cn/img/animate-effect/Star.gif',
     name: '星空',
     value: 3
+  },
+  {
+    img: 'https://cdn.kongfandong.cn/img/animate-effect/FireFlies.gif',
+    name: '萤火虫',
+    value: 4
+  },
+  {
+    img: 'https://cdn.kongfandong.cn/img/animate-effect/Focus.gif',
+    name: '聚焦',
+    value: 5
   }
 ])
 
 const onSelect = (value: number) => {
   effectActive.value = value
-  // store.updateState({
-  //   key: 'backgroundEffectActive',
-  //   value: value
-  // })
 }
 
 const onSubmit = () => {
@@ -118,7 +124,7 @@ const onSubmit = () => {
           padding-bottom: 100%;
           position: relative;
           border-radius: 4px;
-          border: 2px solid #aaa;
+          outline: 2px solid #aaa;
           cursor: pointer;
           overflow: hidden;
           background: #e9e9e9;
@@ -137,7 +143,7 @@ const onSubmit = () => {
         }
         &.active {
           .img-wrapper {
-            border: 2px solid $color-primary;
+            outline: 2px solid $color-primary;
             box-shadow: 0 0 10px rgba($color-primary, 0.4);
           }
           .effect-name {

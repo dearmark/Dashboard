@@ -4,10 +4,13 @@ import { getSupportFontFamilyList } from '@/utils/font'
 
 export default createPinia().use(piniaPluginPersistedstate)
 
-const updateLocalGlobal = (global: any) => localStorage.setItem('global', JSON.stringify(global))
+const isPreviewMode = location.href.includes('preview=')
+const storageCtx = isPreviewMode ? sessionStorage : localStorage
+
+const updateLocalGlobal = (global: any) => storageCtx.setItem('global', JSON.stringify(global))
 // It need reset default global background w & h when use random image.
 const getLocalGlobal = () => {
-  const global = JSON.parse(localStorage.getItem('global') || '{}')
+  const global = JSON.parse(storageCtx.getItem('global') || '{}')
   if (global.background && global.background.includes('/api/randomPhoto')) {
     const w = window.innerWidth
     const h = window.innerHeight
@@ -57,10 +60,10 @@ export const useStore = defineStore({
       actionElement: null as ComponentOptions | null,
       showBackgroundEffect: false,
       showRefreshBtn: true,
-      showTabSwitchBtn: true,
+      showTabSwitchBtn: true as Boolean | Number,
       enableKeydownSwitchTab: true,
       wallpaperCollectionList: [] as string[],
-      realBackgroundURL: localStorage.getItem('cacheBackgroundURL') || '',
+      realBackgroundURL: '',
       backgroundEffectActive: 0
     }
   },
@@ -181,6 +184,7 @@ export const useStore = defineStore({
     }
   },
   persist: {
+    storage: storageCtx,
     paths: [
       'hiddenWarnLockTips',
       'list',
