@@ -1,7 +1,7 @@
 <template>
   <div
-    class="wrapper material-verse"
     ref="verseElement"
+    class="wrapper material-verse"
     :style="{
       fontSize: componentSetting.textFontSize + 'px',
       color: componentSetting.textColor,

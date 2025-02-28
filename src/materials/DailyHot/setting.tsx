@@ -1,21 +1,33 @@
+import { DAILY_HOT_CLASSIFY } from '@/constanst'
 import pick from '../base'
 export default {
   formData: {
+    enableList: ['weibo', 'zhihu', 'sspai', 'bilibili'],
     limit: 10,
-    duration: 5,
-    jumpType: 1,
-    showTitle: true,
-    clickActionType: 0,
     position: 5,
-    textFontSize: 16,
+    textFontSize: 12,
     textColor: '#d8d8d8',
     textShadow: '0 0 1px #464646',
-    iconShadow: '0 0 1px #464646',
     fontFamily: '',
     padding: 10
   },
   formConf (formData: any) {
     return {
+      enableList: {
+        label: '热榜站点',
+        type: 'checkbox-group',
+        checkbox: {
+          list: DAILY_HOT_CLASSIFY,
+          label: 'label',
+          value: 'value',
+          attrs: {
+            style: 'display: block; height: 24px;'
+          }
+        },
+        attrs: {
+          style: 'padding-top: 8px;'
+        }
+      },
       limit: {
         label: '列表条目数',
         type: 'input-number',
@@ -26,27 +38,11 @@ export default {
           style: 'width: 100px'
         },
       },
-      duration: {
-        label: '刷新频率',
-        type: 'input-number',
-        attrs: {
-          'controls-position': 'right',
-          min: 5,
-          max: 120,
-          style: 'width: 100px'
-        },
-        unit: 'min',
-        tips: 'durationMinuteTips'
-      },
       ...pick(formData, [
-        'jumpType',
-        'showTitle',
-        'clickActionType',
         'position',
         'textFontSize',
         'textColor',
         'textShadow',
-        'iconShadow',
         'fontFamily',
         'padding'
       ])

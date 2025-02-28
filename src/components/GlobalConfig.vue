@@ -4,7 +4,7 @@
     :title="$t('全局设置')"
     width="min(480px, 98vw)"
     height="min(520px, 90vh)"
-    customClass="global-config-dialog"
+    custom-class="global-config-dialog"
     @close="close"
   >
     <WarnLock />
@@ -12,31 +12,35 @@
       <el-form-item :label="$t('壁纸')">
         <BackgroundSelector
           v-model:background="state.formData.background"
-          isFullScreen
-          recommendVideo
+          is-full-screen
+          recommend-video
         />
         <BackgroundFilterSelector
           v-if="state.formData.background.includes('url')"
           v-model:filter="state.formData.backgroundFilter"
-          isFullScreen
+          is-full-screen
         />
       </el-form-item>
       <el-form-item :label="$t('杂项')">
         <div class="form-row-control">
-          <div class="label">{{ $t('语言') }}</div>
+          <div class="label">
+            {{ $t('语言') }}
+          </div>
           <div class="content">
             <el-select v-model="state.formData.lang">
               <el-option
                 v-for="lang in langList"
+                :key="lang.value"
                 :label="lang.label"
                 :value="lang.value"
-                :key="lang.value"
-              ></el-option>
+              />
             </el-select>
           </div>
         </div>
         <div class="form-row-control">
-          <div class="label">{{ $t('组件间隔') }}</div>
+          <div class="label">
+            {{ $t('组件间隔') }}
+          </div>
           <div class="content flex-center-y">
             <el-input-number
               v-model="state.formData.gutter"
@@ -44,13 +48,14 @@
               :min="0"
               :max="50"
               style="width: 100px"
-            >
-            </el-input-number>
+            />
             <span class="font-control">px</span>
           </div>
         </div>
         <div class="form-row-control">
-          <div class="label">{{ $t('全局字体') }}</div>
+          <div class="label">
+            {{ $t('全局字体') }}
+          </div>
           <div class="content">
             <div>
               <div class="flex-center-y">
@@ -71,26 +76,48 @@
           </div>
         </div>
         <div class="form-row-control">
-          <div class="label">{{ $t('网站标题') }}</div>
+          <div class="label">
+            {{ $t('网站标题') }}
+          </div>
           <div class="content flex-center-y">
             <el-input
               v-model="state.formData.siteTitle"
               :placeholder="$t('自定义网站的标题')"
               clearable
               style="width: 214px"
-            ></el-input>
+            />
             <Tips :content="$t('siteTitleTips')" />
           </div>
         </div>
         <div class="form-row-control">
-          <div class="label ellipsis" :title="$t('禁用动画')">{{ $t('禁用动画') }}</div>
+          <div class="label">
+            {{ $t('网站Icon') }}
+          </div>
+          <div class="content flex-center-y">
+            <div class="icon-wrapper">
+              <img v-if="state.formData.siteIcon" :src="state.formData.siteIcon" />
+              <img v-else src="/favicon.ico">
+              <div v-if="state.formData.siteIcon" class="reset-text" @click="state.formData.siteIcon = ''">Clean</div>
+            </div>
+            <button type="button" class="btn btn-small btn-primary" style="height: 26px;padding: 0 8px;margin-right: 0;" @click="showIconPicker">
+              {{ $t('图标库') }}
+            </button>
+            <Tips :content="$t('siteIconTips')" />
+          </div>
+        </div>
+        <div class="form-row-control">
+          <div class="label ellipsis" :title="$t('禁用动画')">
+            {{ $t('禁用动画') }}
+          </div>
           <div class="content flex-center-y">
             <el-switch v-model="state.formData.disabledDialogAnimation" style="width: 214px" />
             <Tips :content="$t('disabledDialogAnimationTips')" />
           </div>
         </div>
         <div class="form-row-control">
-          <div class="label ellipsis" :title="$t('菜单按钮')">{{ $t('菜单按钮') }}</div>
+          <div class="label ellipsis" :title="$t('菜单按钮')">
+            {{ $t('菜单按钮') }}
+          </div>
           <div class="content flex-center-y">
             <el-switch v-model="state.formData.showMenuBtn" style="width: 214px" />
             <Tips :content="$t('showMenuBtnTips')" />
@@ -116,11 +143,16 @@
     </el-form>
     <template #footer>
       <div class="footer" style="text-align: right; padding: 12px">
-        <button type="button" class="btn" @click="close">{{ $t('取消') }}</button>
-        <button type="button" class="btn btn-primary" @click="submit">{{ $t('确认') }}</button>
+        <button type="button" class="btn" @click="close">
+          {{ $t('取消') }}
+        </button>
+        <button type="button" class="btn btn-primary" @click="submit">
+          {{ $t('确认') }}
+        </button>
       </div>
     </template>
   </easy-dialog>
+  <IconifyPicker ref="IconifyPickerEl" />
 </template>
 
 <script lang="ts">
@@ -128,6 +160,7 @@ import { defineComponent, ref, watch, reactive, defineAsyncComponent } from 'vue
 import WarnLock from '@/components/FormControl/WarnLock.vue'
 import Tips from '@/components/Tools/Tips.vue'
 import TextLoading from '@/components/Tools/TextLoading.vue'
+import IconifyPicker from '@/components/Tools/IconifyPicker.vue'
 import { useStore } from '@/store'
 import { langList } from '@/lang'
 import { useI18n } from 'vue-i18n'
@@ -144,6 +177,7 @@ export default defineComponent({
     }),
     WarnLock,
     Tips,
+    IconifyPicker,
     FontSelector: defineAsyncComponent(() => import('@/components/FormControl/FontSelector.vue'))
   },
   props: {
@@ -155,7 +189,7 @@ export default defineComponent({
   setup(props, { emit }) {
     const store = useStore()
 
-    const { locale } = useI18n()
+    const { t, locale } = useI18n()
 
     const state = reactive({
       formData: {
@@ -164,6 +198,20 @@ export default defineComponent({
     })
 
     const dialogVisible = ref(false)
+
+    const IconifyPickerEl = ref()
+    const showIconPicker = async () => {
+      try {
+        const data = await IconifyPickerEl.value.show()
+        if (data.length < 128 * 1024) {
+          state.formData.siteIcon = data
+        } else {
+          alert(t('图标大小不能超过128k'))
+        }
+      } catch {
+        //
+      }
+    }
 
     watch(
       () => props.visible,
@@ -186,6 +234,12 @@ export default defineComponent({
     const submit = () => {
       store.updateGlobal(state.formData)
       document.title = state.formData.siteTitle || 'Howdz 起始页'
+      if (state.formData.siteIcon) {
+        const iconDom = document.querySelector("link[rel='icon']") as HTMLLinkElement
+        if (iconDom) {
+          iconDom.href = state.formData.siteIcon
+        }
+      }
       close()
     }
 
@@ -246,7 +300,9 @@ export default defineComponent({
       submit,
       state,
       langList,
-      dialogVisible
+      dialogVisible,
+      IconifyPickerEl,
+      showIconPicker
     }
   }
 })
@@ -272,6 +328,24 @@ export default defineComponent({
 .font-control {
   margin-left: 8px;
   font-weight: bold;
+}
+
+.icon-wrapper {
+  display: flex;
+  align-items: center;
+  width: 151px;
+  justify-content: space-between;
+  img {
+    width: 24px;
+    height: 24px;
+    padding: 3px;
+  }
+  .reset-text {
+    font-size: 12px;
+    color: #942;
+    margin-right: 4px;
+    cursor: pointer;
+  }
 }
 </style>
 

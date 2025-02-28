@@ -10,6 +10,7 @@
   >
     <div
       class="bookmark-wrapper"
+      ref="bookmarkEl"
       :style="{
         maxWidth: `${componentSetting.maxWidth || 880}px`,
         pointerEvents: isLock ? 'all' : 'none'
@@ -25,7 +26,8 @@
               width: 160,
               iconType: 'vnode-icon'
             }"
-            :class="['item']"
+            :class="['item', element.type === 'folder' ? 'folder' : '']"
+            :title="element.title"
             @click="jump(element, $event)"
           >
             <div
@@ -33,7 +35,7 @@
               :style="{ background: element.bgColor, boxShadow: componentSetting.boxShadow }"
             >
               <template v-if="element.type !== 'folder'">
-                <img v-if="element.iconType === 'network'" :src="element.iconPath" alt="" />
+                <img v-if="element.iconType === 'network'" :src="element.iconPath" alt="">
                 <div
                   v-if="element.iconType === 'text'"
                   :style="{ fontSize: iconSize, color: element.iconPath }"
@@ -48,12 +50,14 @@
                 :width="(iconSize || '32').replace('px', '')"
                 :height="(iconSize || '32').replace('px', '')"
               >
-                  <path d="M853.333333 256H469.333333l-85.333333-85.333333H170.666667c-46.933333 0-85.333333 38.4-85.333334 85.333333v170.666667h853.333334v-85.333334c0-46.933333-38.4-85.333333-85.333334-85.333333z" fill="#FFD766"></path>
-                  <path d="M853.333333 256H170.666667c-46.933333 0-85.333333 38.4-85.333334 85.333333v426.666667c0 46.933333 38.4 85.333333 85.333334 85.333333h682.666666c46.933333 0 85.333333-38.4 85.333334-85.333333V341.333333c0-46.933333-38.4-85.333333-85.333334-85.333333z" fill="#FFAC33"></path>
+                <path d="M853.333333 256H469.333333l-85.333333-85.333333H170.666667c-46.933333 0-85.333333 38.4-85.333334 85.333333v170.666667h853.333334v-85.333334c0-46.933333-38.4-85.333333-85.333334-85.333333z" fill="#FFD766" />
+                <path d="M853.333333 256H170.666667c-46.933333 0-85.333333 38.4-85.333334 85.333333v426.666667c0 46.933333 38.4 85.333333 85.333334 85.333333h682.666666c46.933333 0 85.333333-38.4 85.333334-85.333333V341.333333c0-46.933333-38.4-85.333333-85.333334-85.333333z" fill="#FFAC33" />
               </svg>
             </div>
-            <div class="tile-title" :style="linesNumberStyle">{{ element.title }}</div>
-            <div class="selected-icon" v-if="selectedIds.includes(element.id)">
+            <div class="tile-title" :style="linesNumberStyle">
+              {{ element.title }}
+            </div>
+            <div v-if="selectedIds.includes(element.id)" class="selected-icon">
               <Icon name="check" size="30" />
             </div>
           </div>
@@ -69,28 +73,30 @@
               <Icon name="add" />
             </div>
           </div>
-          <div class="item fake" v-for="number in 20" :key="number"></div>
+          <div v-for="number in 20" :key="number" class="item fake" />
         </template>
       </Draggable>
     </div>
     <ConfigDialog
       ref="configDialog"
-      :boxSize="boxSize"
-      :boxRadius="boxRadius"
-      :iconSize="iconSize"
+      :box-size="boxSize"
+      :box-radius="boxRadius"
+      :icon-size="iconSize"
       @add="addBookmark"
       @edit="editBookmark"
       @import="importBookmark"
     />
-    <MoveDialog ref="moveDialog" :folderList="folderList" />
+    <MoveDialog ref="moveDialog" :folder-list="folderList" />
     <ActionPopover
       ref="popover"
-      :close-on-click-outside="!!componentSetting.closeClickOutside"
+      :close-on-click-outside="!!componentSetting.closeClickOutside && configDialogClosed"
+      :z-index="1000"
       @closed="popoverClosed"
-      :zIndex="1000"
     >
-      <div class="popover-wrapper" v-if="folderOpener">
-        <div class="title">{{ folderOpener.title }}</div>
+      <div v-if="folderOpener" class="bookmark-popover-wrapper" :style="{ background: componentSetting.folderBg }">
+        <div class="title" :style="{ color: textColor }">
+          {{ folderOpener.title }}
+        </div>
         <Draggable
           v-model="folderOpener.children"
           class="bookmark-draggable-wrapper is-in-popover"
@@ -107,6 +113,7 @@
               }"
               :class="['item']"
               :style="{ width: boxWrapperSize, minHeight: boxWrapperSize, padding }"
+              :title="element.title"
               @click="jump(element)"
             >
               <div
@@ -125,7 +132,7 @@
                     :style="{ width: iconSize, height: iconSize }"
                     :src="element.iconPath"
                     alt=""
-                  />
+                  >
                   <div
                     v-if="element.iconType === 'text'"
                     :style="{ fontSize: iconSize, color: element.iconPath }"
@@ -138,7 +145,7 @@
               <div class="tile-title" :style="`font-size: ${textFontSize};color: ${textColor};${linesNumberStyle}`">
                 {{ element.title }}
               </div>
-              <div class="selected-icon" v-if="selectedIds.includes(element.id)">
+              <div v-if="selectedIds.includes(element.id)" class="selected-icon">
                 <Icon name="check" size="30" />
               </div>
             </div>
@@ -148,7 +155,7 @@
               v-if="!isInBatch"
               v-show="
                 !componentSetting.hiddenAddBtn ||
-                (folderOpener.children && folderOpener.children.length === 0)
+                  (folderOpener.children && folderOpener.children.length === 0)
               "
               class="item btn-add-item"
               :style="{ width: boxWrapperSize, height: boxWrapperSize, padding }"
@@ -162,18 +169,19 @@
               </div>
             </div>
             <div
-              class="item fake"
-              :style="{ width: boxWrapperSize, padding: `0 ${padding}` }"
               v-for="number in 20"
               :key="number"
-            ></div>
+              class="item fake"
+              :style="{ width: boxWrapperSize, padding: `0 ${padding}` }"
+            />
           </template>
         </Draggable>
-        <div class="batch-operation-wrapper" v-if="isInBatch && batchParent">
-          <div class="close-btn" @click="closeBatch"><Icon name="close" /></div>
+        <div v-if="isInBatch && batchParent" class="batch-operation-wrapper">
+          <div class="close-btn" @click="closeBatch">
+            <Icon name="close" />
+          </div>
           <div class="selected-count">
-            <span class="num">{{ selected.length }}</span
-            >{{ $t('项已选择') }}
+            <span class="num">{{ selected.length }}</span>{{ $t('项已选择') }}
           </div>
           <div class="operation-btn-wrapper">
             <div class="move-btn" @click="handleMove(selected, false, folderOpener)">
@@ -186,11 +194,12 @@
         </div>
       </div>
     </ActionPopover>
-    <div class="batch-operation-wrapper" v-if="isInBatch && !batchParent">
-      <div class="close-btn" @click="closeBatch"><Icon name="close" /></div>
+    <div v-if="isInBatch && !batchParent" class="batch-operation-wrapper">
+      <div class="close-btn" @click="closeBatch">
+        <Icon name="close" />
+      </div>
       <div class="selected-count">
-        <span class="num">{{ selected.length }}</span
-        >{{ $t('项已选择') }}
+        <span class="num">{{ selected.length }}</span>{{ $t('项已选择') }}
       </div>
       <div class="operation-btn-wrapper">
         <div class="move-btn" @click="handleMove(selected)">
@@ -206,7 +215,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, nextTick, onMounted, onUnmounted, h } from 'vue'
+import { computed, ref, nextTick, onMounted, onUnmounted, h, onBeforeUnmount } from 'vue'
 import Draggable from 'vuedraggable'
 import { useStore } from '@/store'
 import ConfigDialog from './ConfigDialog.vue'
@@ -241,7 +250,10 @@ const vMouseMenu = {
 const { t } = useI18n()
 
 const configDialog = ref()
+const configDialogClosed = ref(true)
+
 const iframeOpener = ref()
+const bookmarkEl = ref()
 
 const isLock = computed(() => store.isLock)
 const boxSize = computed(() => props.componentSetting.boxSize + 'px')
@@ -321,7 +333,7 @@ const menuList = ref<MenuSetting[]>([
     label: () => t('添加'),
     icon: h(Icon, { name: 'add', size: 18 }) as any,
     fn: (params: any) => {
-      handleAddNewBookmark(params.parent)
+      handleAddNewBookmark(params.element.type === 'folder' ? params.element : params.parent)
     }
   },
   {
@@ -359,8 +371,14 @@ const menuList = ref<MenuSetting[]>([
   }
 ])
 
-const handleEdit = (params: Bookmark, parent?: Bookmark) => configDialog.value.open(params, parent)
-const handleAddNewBookmark = (parent?: Bookmark | null) => configDialog.value.open(null, parent)
+const handleEdit = (params: Bookmark, parent?: Bookmark) => {
+  configDialog.value.open(params, parent)
+  configDialogClosed.value = false
+}
+const handleAddNewBookmark = (parent?: Bookmark | null) => {
+  configDialog.value.open(null, parent)
+  configDialogClosed.value = false
+}
 
 const addBookmark = (formData: Bookmark, parent?: Bookmark) => {
   const element = JSON.parse(JSON.stringify(props.element))
@@ -442,6 +460,9 @@ const importBookmark = (bookmarkData: any[]) => {
     : element.componentSetting.bookmark
   bookmark.push(...data)
   store.editComponent(element)
+  setTimeout(() => {
+    configDialogClosed.value = true
+  }, 400)
 }
 
 const jump = (element: Bookmark, $event?: any) => {
@@ -593,6 +614,43 @@ const preventMouseMenu = (e: MouseEvent) => {
 }
 onMounted(() => document.addEventListener('contextmenu', preventMouseMenu))
 onUnmounted(() => document.removeEventListener('contextmenu', preventMouseMenu))
+
+// 接收拖拽链接进行添加书签
+let dragTimer: ReturnType<typeof setTimeout>
+const drapOverEvent = (e: DragEvent) => {
+  e.preventDefault()
+  clearTimeout(dragTimer)
+  dragTimer = setTimeout(() => {
+    bookmarkEl.value.classList.remove('on-drag-enter')
+  }, 200)
+}
+const dropEvent = (e: DragEvent) => {
+  e.preventDefault()
+  const data = e.dataTransfer?.getData('text')
+  if (!data || !data.includes('http')) return
+  try {
+    const url = new URL(data)
+    configDialog.value.open({ url: url.href })
+    configDialogClosed.value = false
+  } catch (e) {
+    console.error(e)
+  }
+}
+const dragEnterEvent = () => {
+  const checkIsDragsortable = bookmarkEl.value.querySelector('.sortable-chosen')
+  if (checkIsDragsortable) return
+  bookmarkEl.value.classList.add('on-drag-enter')
+}
+onMounted(() => {
+  bookmarkEl.value.addEventListener('dragover', drapOverEvent)
+  bookmarkEl.value.addEventListener('drop', dropEvent)
+  bookmarkEl.value.addEventListener('dragenter', dragEnterEvent)
+})
+onBeforeUnmount(() => {
+  bookmarkEl.value.removeEventListener('dragover', drapOverEvent)
+  bookmarkEl.value.removeEventListener('drop', dropEvent)
+  bookmarkEl.value.removeEventListener('dragenter', dragEnterEvent)
+})
 </script>
 <style lang="scss" scoped>
 .wrapper {
@@ -604,6 +662,9 @@ onUnmounted(() => document.removeEventListener('contextmenu', preventMouseMenu))
   user-select: none;
   .bookmark-wrapper {
     width: 100%;
+    &.on-drag-enter {
+      background: rgba(230, 201, 141, 0.25)
+    }
   }
 }
 .bookmark-draggable-wrapper {
@@ -688,6 +749,9 @@ onUnmounted(() => document.removeEventListener('contextmenu', preventMouseMenu))
       align-items: center;
       justify-content: center;
     }
+    &.btn-add-item {
+      justify-content: center;
+    }
   }
   &.is-in-popover {
     .item:hover {
@@ -695,20 +759,22 @@ onUnmounted(() => document.removeEventListener('contextmenu', preventMouseMenu))
     }
   }
 }
-.popover-wrapper {
+.bookmark-popover-wrapper {
   background: rgba(#242428, 0.9);
+  backdrop-filter: blur(8px);
   width: 100%;
   height: 100%;
   padding: 10px;
   border-radius: 4px;
   display: flex;
   flex-direction: column;
+  box-shadow: 0 0 8px rgba(0,0,0,0.2);
   .title {
     font-weight: bold;
     color: #fff;
     font-size: 20px;
-    padding-left: 10px;
-    border-left: 4px solid #b8b8e4;
+    padding-left: 8px;
+    // border-left: 4px solid #b8b8e4;
     margin-bottom: 12px;
   }
   .bookmark-draggable-wrapper {

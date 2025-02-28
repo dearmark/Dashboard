@@ -4,13 +4,15 @@
     style="margin-left: -100px; padding-bottom: 10px; border-bottom: 1px solid #ccc"
   >
     <div class="warning">
-      {{$t('searchConfigTips')}}
+      {{ $t('searchConfigTips') }}
     </div>
     <div class="content">
       <button type="button" class="btn btn-primary btn-small btn-add" @click="handleAddNewEngine">
-        {{$t('添加')}}
+        {{ $t('添加') }}
       </button>
-      <div class="text s-title">{{$t('当前引擎组')}}</div>
+      <div class="text s-title">
+        {{ $t('当前引擎组') }}
+      </div>
       <div class="current-engine-wrapper">
         <Draggable
           v-model="cloneEngineList"
@@ -24,8 +26,8 @@
           <template #item="{ element }">
             <div
               class="engine-list-item"
-              @dblclick="handleEditEngine(element)"
               :title="element.iconType !== 'local' ? $t('双击重新编辑') : ''"
+              @dblclick="handleEditEngine(element)"
             >
               <img
                 v-if="element.iconType === 'local' || element.iconType === 'network'"
@@ -33,23 +35,27 @@
                 alt="icon"
                 width="24"
                 height="24"
-              />
+              >
               <img
                 v-if="element.iconType === 'api'"
                 :src="getTargetIcon(element.link)"
                 alt="icon"
                 width="24"
                 height="24"
-              />
+              >
               <div v-if="element.iconType === 'text'" class="no-icon">
                 {{ element.name.slice(0, 1) }}
               </div>
-              <div class="text">{{ element.name }}</div>
+              <div class="text">
+                {{ element.name }}
+              </div>
             </div>
           </template>
         </Draggable>
       </div>
-      <div class="text s-title">{{$t('备用引擎组')}}</div>
+      <div class="text s-title">
+        {{ $t('备用引擎组') }}
+      </div>
       <div class="backup-engine-wrapper">
         <Draggable
           v-model="cloneBackupEngineList"
@@ -66,22 +72,26 @@
                 alt="icon"
                 width="24"
                 height="24"
-              />
+              >
               <img
                 v-if="element.iconType === 'api'"
                 :src="getTargetIcon(element.link)"
                 alt="icon"
                 width="24"
                 height="24"
-              />
+              >
               <div v-if="element.iconType === 'text'" class="no-icon">
                 {{ element.name.slice(0, 1) }}
               </div>
-              <div class="text">{{ element.name }}</div>
+              <div class="text">
+                {{ element.name }}
+              </div>
             </div>
           </template>
         </Draggable>
-        <div v-if="showDeleteArea" class="delete-area">{{$t('拖拽至此处删除')}}</div>
+        <div v-if="showDeleteArea" class="delete-area">
+          {{ $t('拖拽至此处删除') }}
+        </div>
       </div>
     </div>
   </div>
@@ -90,7 +100,7 @@
     :title="`${state.formData._id ? $t('编辑') : $t('添加')}${$t('自定义引擎')}`"
     width="min(380px, 90vw)"
     height="min(460px, 80vh)"
-    customClass="add-engine-dialog"
+    custom-class="add-engine-dialog"
   >
     <el-form ref="form" label-width="90px" :model="state.formData" :rules="state.formRules">
       <el-form-item :label="$t('引擎名称')" prop="name">
@@ -105,23 +115,30 @@
           />
           <Tips>
             <div class="tips">
-              {{$t('engineConfigTips1')}} <b>[0]</b> {{$t('engineConfigTips2')}}
+              {{ $t('engineConfigTips1') }} <b>[0]</b> {{ $t('engineConfigTips2') }}
             </div>
-            <div class="tips">{{$t('例如')}}: <b>https://juejin.im/search?query=[0]&type=all</b></div>
+            <div class="tips">
+              {{ $t('例如') }}: <b>https://juejin.im/search?query=[0]&type=all</b>
+            </div>
           </Tips>
         </div>
       </el-form-item>
       <el-form-item :label="$t('引擎图标')" prop="iconType">
         <el-radio-group v-model="state.formData.iconType">
-          <el-radio v-for="item in iconTypeList" :label="item.value" :key="item.value">{{
-            $t(item.label)
-          }}</el-radio>
+          <el-radio v-for="item in iconTypeList" :key="item.value" :label="item.value">
+            {{
+              $t(item.label)
+            }}
+          </el-radio>
         </el-radio-group>
       </el-form-item>
-      <el-form-item :label="$t('图标地址')" prop="iconPath" v-if="state.formData.iconType === 'network'">
-        <el-radio-group v-model="state.formData.iconType">
-          <el-input v-model="state.formData.iconPath" :placeholder="$t('请输入图标地址')"></el-input>
-        </el-radio-group>
+      <el-form-item v-if="state.formData.iconType === 'network'" :label="$t('图标地址')" prop="iconPath">
+        <div class="flex-center-y" style="width: 100%;">
+          <el-input v-model="state.formData.iconPath" :placeholder="$t('请输入图标地址')" style="width: 100%;flex: 1" />
+          <button type="button" class="btn btn-small btn-primary" style="height: 32px;padding: 0 8px;" @click="showIconPicker">
+            {{ $t('图标库') }}
+          </button>
+        </div>
       </el-form-item>
       <el-form-item :label="$t('图标预览')">
         <div class="icon-img-preview-box">
@@ -132,29 +149,34 @@
               alt="icon"
               width="24"
               height="24"
-            />
+            >
             <img
               v-if="state.formData.iconType === 'api'"
               :src="tempIconLink"
               alt="icon"
               width="24"
               height="24"
-            />
+            >
             <div v-if="state.formData.iconType === 'text'" class="no-icon">
               {{ state.formData.name.slice(0, 1) }}
             </div>
           </template>
-          <div v-else class="icon-img-preview"></div>
+          <div v-else class="icon-img-preview" />
         </div>
       </el-form-item>
     </el-form>
     <template #footer>
       <div class="footer" style="text-align: right; padding: 12px">
-        <button type="button" class="btn" @click="close">{{$t('取消')}}</button>
-        <button type="button" class="btn btn-primary" @click="submit">{{$t('确认')}}</button>
+        <button type="button" class="btn" @click="close">
+          {{ $t('取消') }}
+        </button>
+        <button type="button" class="btn btn-primary" @click="submit">
+          {{ $t('确认') }}
+        </button>
       </div>
     </template>
   </easy-dialog>
+  <IconifyPicker ref="IconifyPickerEl" />
 </template>
 
 <script lang="ts">
@@ -162,6 +184,7 @@ import { defineComponent, onMounted, ref, nextTick, reactive, computed, toRaw } 
 import Draggable from 'vuedraggable'
 import { getTargetIcon } from '@/utils/images'
 import Tips from '@/components/Tools/Tips.vue'
+import IconifyPicker from '@/components/Tools/IconifyPicker.vue'
 import { uid } from '@/utils'
 import { useI18n } from 'vue-i18n'
 import request from '@/utils/request'
@@ -171,19 +194,20 @@ const iconTypeList = [
     value: 'api'
   },
   {
-    label: '文字图标',
-    value: 'text'
-  },
-  {
     label: '网络图片',
     value: 'network'
+  },
+  {
+    label: '文字图标',
+    value: 'text'
   }
 ]
 export default defineComponent({
   name: 'EngineConfig',
   components: {
     Draggable,
-    Tips
+    Tips,
+    IconifyPicker
   },
   props: {
     engineList: {
@@ -319,6 +343,12 @@ export default defineComponent({
             const index = cloneEngineList.value.findIndex((item) => item._id === state.formData._id)
             if (~index) {
               cloneEngineList.value[index] = { ...toRaw(state.formData) }
+            } else {
+              // 现在允许编辑local引擎，根据Name查找
+              const nameIndex = cloneEngineList.value.findIndex((item) => item.name === state.formData.name)
+              if (~nameIndex) {
+                cloneEngineList.value[nameIndex] = { ...toRaw(state.formData) }
+              }
             }
           } else {
             // 添加
@@ -342,9 +372,22 @@ export default defineComponent({
 
     const handleEditEngine = (item: any) => {
       const { _id, name, link, iconType, iconPath } = item
-      if (iconType === 'local') return
-      state.formData = { _id, name, link, iconType, iconPath }
+      if (iconType === 'local') {
+        state.formData = { _id: uid(), name, link, iconType: 'network', iconPath }
+      } else {
+        state.formData = { _id, name, link, iconType, iconPath }
+      }
       engineDialogVisible.value = true
+    }
+
+    const IconifyPickerEl = ref()
+    const showIconPicker = async () => {
+      try {
+        const data = await IconifyPickerEl.value.show()
+        state.formData.iconPath = data
+      } catch (e) {
+        console.error(e)
+      }
     }
 
     return {
@@ -366,7 +409,9 @@ export default defineComponent({
       submit,
       getTargetIcon,
       tempIconLink,
-      handleLinkInputBlur
+      handleLinkInputBlur,
+      IconifyPickerEl,
+      showIconPicker
     }
   }
 })

@@ -16,11 +16,11 @@
         playsinline
         disablePictureInPicture
         disableRemotePlayback
-        @error="handleVideoError"
         :style="{
           filter: filter
         }"
-      ></video>
+        @error="handleVideoError"
+      />
     </div>
     <div v-else-if="iframeURL" :class="['bg-media-wrapper', showBackgroundEffect && 'system-bg-effect']">
       <iframe 
@@ -32,7 +32,7 @@
           height: '100%',
           pointerEvents: isLock ? 'all' : 'none'
         }"
-      ></iframe>
+      />
     </div>
     <div
       v-else-if="realBackgroundURL"
@@ -40,29 +40,27 @@
     >
       <div class="bg-media-filter" :style="`width:100%;height:100%;filter:${filter}`">
         <img
+          ref="bgDom"
           class="global-bg-img"
           :crossorigin="imgCrossorigin"
           :src="realBackgroundURL"
           style="width: 100%; height: 100%; object-fit: cover; opacity: 0"
-          ref="bgDom"
           @load="handleImgLoad"
           @error="hanleImgError"
-        />
+        >
       </div>
       <div class="icon-wrapper">
-        <div class="icon-item" :title="$t('刷新壁纸')">
+        <div v-if="showRefreshBtn && (backgroundURL.includes('randomPhoto') || backgroundURL.includes('localImg'))" class="icon-item" :title="$t('刷新壁纸')">
           <Icon
-            v-if="showRefreshBtn && (backgroundURL.includes('randomPhoto') || backgroundURL.includes('localImg'))"
             name="refresh"
             class="btn-refresh"
             size="20"
             @click="refresh"
           />
         </div>
-        <div class="icon-item" :title="$t('喜欢')">
+        <div v-if="showRefreshBtn && backgroundURL.includes('randomPhoto')" class="icon-item" :title="$t('喜欢')">
           <svg
-            v-if="showRefreshBtn && backgroundURL.includes('randomPhoto')"
-            xmlns='http://www.w3.org/2000/svg'
+            xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
             width="20"
             height="20"
@@ -109,13 +107,15 @@ const getURL = (input: string) => {
 const backgroundURL = computed(() => {
   if (props.background && props.background.includes('url')) {
     let url = getURL(props.background)
-    url += `${url.includes('?') ? '&' : '?'}t=${time.value}`
+    if (url.includes('random') || url.includes('localImg')) {
+      url += `${url.includes('?') ? '&' : '?'}t=${time.value}`
+    }
     return url
   }
   return ''
 })
 
-let timer: any
+let timer: ReturnType<typeof setInterval>
 watch(
   () => props.background,
   (val) => {
@@ -152,7 +152,7 @@ watch(
   () => backgroundURL.value,
   () => updateBackground()
 )
-let directToUnsplash = true // 是否直连到Unsplash获取随机图
+let directToUnsplash = false // 是否直连到Unsplash获取随机图
 const updateBackground = async () => {
   const val = backgroundURL.value
   if (val && val.includes('randomPhoto')) {
@@ -181,6 +181,7 @@ const updateBackground = async () => {
             const isMirror = search.get('type') === 'mirror'
             const directURL = `https://source.unsplash.com/random/${w}x${h}/?${keyword}`
             const res = await request({ url: directURL, method: 'head', return: 'response' })
+            if (res.status === 404) throw new Error('404')
             result = isMirror ? res.url.replace('images.unsplash.com', 'dogefs.s3.ladydaily.com/~/source/unsplash') :res.url
           } catch {
             directToUnsplash = false // 当直连Unsplash失败时直接API接口
@@ -209,7 +210,7 @@ const updateBackground = async () => {
       }
       store.updateState({ key: 'realBackgroundURL', value: result })
     } else {
-      store.updateState({ key: 'realBackgroundURL', value: 'https://dogefs.s3.ladydaily.com/~/source/unsplash/photo-1612342222980-e549ae573834' })
+      store.updateState({ key: 'realBackgroundURL', value: 'https://images.unsplash.com/photo-1612342222980-e549ae573834' })
     }
   } else {
     store.updateState({ key: 'realBackgroundURL', value: val })
